@@ -1,5 +1,6 @@
 export enum Country {
   BRAZIL = 'BRAZIL'
+  // Add other countries as needed
 }
 
 export enum State {
@@ -35,16 +36,16 @@ export enum State {
 export enum AddressType {
   HOME = 'HOME',
   WORK = 'WORK',
-  OTHER = 'OTHER'
+  CORRESPONDENCE = 'CORRESPONDENCE'
 }
 
 export enum ContactType {
   PERSONAL_CELL_PHONE = 'PERSONAL_CELL_PHONE',
-  PERSONAL_EMAIL = 'PERSONAL_EMAIL',
-  PERSONAL_HOME_PHONE = 'PERSONAL_HOME_PHONE',
   WORK_CELL_PHONE = 'WORK_CELL_PHONE',
-  WORK_EMAIL = 'WORK_EMAIL',
-  PROFESSIONAL_PHONE = 'PROFESSIONAL_PHONE'
+  HOME_PHONE = 'HOME_PHONE',
+  WORK_PHONE = 'WORK_PHONE',
+  PERSONAL_EMAIL = 'PERSONAL_EMAIL',
+  WORK_EMAIL = 'WORK_EMAIL'
 }
 
 export enum PersonType {
@@ -64,16 +65,16 @@ export enum DocumentType {
 export const EnumLabels = {
   AddressType: {
     [AddressType.HOME]: 'Residencial',
-    [AddressType.WORK]: 'Trabalho',
-    [AddressType.OTHER]: 'Outro'
+    [AddressType.WORK]: 'Comercial',
+    [AddressType.CORRESPONDENCE]: 'Correspondência'
   },
   ContactType: {
     [ContactType.PERSONAL_CELL_PHONE]: 'Celular Pessoal',
+    [ContactType.WORK_CELL_PHONE]: 'Celular Profissional',
+    [ContactType.HOME_PHONE]: 'Telefone Residencial',
+    [ContactType.WORK_PHONE]: 'Telefone Profissional',
     [ContactType.PERSONAL_EMAIL]: 'Email Pessoal',
-    [ContactType.PERSONAL_HOME_PHONE]: 'Telefone Residencial',
-    [ContactType.WORK_CELL_PHONE]: 'Celular Trabalho',
-    [ContactType.WORK_EMAIL]: 'Email Trabalho',
-    [ContactType.PROFESSIONAL_PHONE]: 'Telefone Profissional'
+    [ContactType.WORK_EMAIL]: 'Email Profissional'
   },
   PersonType: {
     [PersonType.NATURAL]: 'Pessoa Física',
@@ -85,6 +86,9 @@ export const EnumLabels = {
     [DocumentType.ID]: 'RG',
     [DocumentType.PASSPORT]: 'Passaporte',
     [DocumentType.DRIVER_LICENSE]: 'Carteira de Motorista'
+  },
+  Country: {
+    [Country.BRAZIL]: 'Brasil'
   }
 } as const;
 

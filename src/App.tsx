@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
@@ -133,6 +135,7 @@ function App() {
           }
         />
       </Routes>
+      <ToastContainer />
     </DefaultLayout>
   );
 }
