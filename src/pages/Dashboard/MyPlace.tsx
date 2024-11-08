@@ -4,10 +4,9 @@ import ChartOne from '../../components/Charts/ChartOne';
 import ChartThree from '../../components/Charts/ChartThree';
 import ChartTwo from '../../components/Charts/ChartTwo';
 import ChatCard from '../../components/Chat/ChatCard';
-import MapOne from '../../components/Maps/MapOne';
 import TableOne from '../../components/Tables/TableOne';
 
-const ECommerce: React.FC = () => {
+const MyPlace: React.FC = () => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
@@ -101,7 +100,6 @@ const ECommerce: React.FC = () => {
         <ChartOne />
         <ChartTwo />
         <ChartThree />
-        <MapOne />
         <div className="col-span-12 xl:col-span-8">
           <TableOne />
         </div>
@@ -111,4 +109,4 @@ const ECommerce: React.FC = () => {
   );
 };
 
-export default ECommerce;
+export default MyPlace;

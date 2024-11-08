@@ -7,15 +7,14 @@ import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
 import Calendar from './pages/Calendar';
 import Chart from './pages/Chart';
-import ECommerce from './pages/Dashboard/ECommerce';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
+import MyPlace from './pages/Dashboard/MyPlace';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
+import { Clients } from './pages/Clients/Clients';
+import { ClientForm } from './pages/Clients/ClientForm';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,8 +37,26 @@ function App() {
           index
           element={
             <>
-              <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <ECommerce />
+              <PageTitle title="Princial | Aqui você pode ver suas atividades mais importantes e alertas" />
+              <MyPlace />
+            </>
+          }
+        />
+        <Route
+          path="/clients"
+          element={
+            <>
+              <PageTitle title="Clients" />
+              <Clients/>
+            </>
+          }
+        />
+        <Route
+          path="/client-form"
+          element={
+            <>
+              <PageTitle title="Client Form" />
+              <ClientForm/>
             </>
           }
         />
@@ -58,33 +75,6 @@ function App() {
             <>
               <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <Profile />
-            </>
-          }
-        />
-        <Route
-          path="/forms/form-elements"
-          element={
-            <>
-              <PageTitle title="Form Elements | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <FormElements />
-            </>
-          }
-        />
-        <Route
-          path="/forms/form-layout"
-          element={
-            <>
-              <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <FormLayout />
-            </>
-          }
-        />
-        <Route
-          path="/tables"
-          element={
-            <>
-              <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Tables />
             </>
           }
         />
