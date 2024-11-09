@@ -83,6 +83,21 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
             </Grid>
 
             <Grid item xs={12} md={4}>
+              <Select
+                fullWidth
+                value={address.country}
+                onChange={(e) => handleAddressChange(index, 'country', e.target.value)}
+                label="País"
+              >
+                {Object.values(Country).map((country) => (
+                  <MenuItem key={country} value={country}>
+                    {EnumLabels.Country[country]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
               <InputMask
                 mask={ValidationPatterns.zipCode}
                 value={address.zipCode || ''}
@@ -96,15 +111,6 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
                   />
                 )}
               </InputMask>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Cidade"
-                value={address.city || ''}
-                onChange={(e) => handleAddressChange(index, 'city', e.target.value)}
-              />
             </Grid>
 
             <Grid item xs={12} md={8}>
@@ -140,6 +146,15 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
                 label="Bairro"
                 value={address.neighborhood || ''}
                 onChange={(e) => handleAddressChange(index, 'neighborhood', e.target.value)}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Cidade"
+                value={address.city || ''}
+                onChange={(e) => handleAddressChange(index, 'city', e.target.value)}
               />
             </Grid>
 

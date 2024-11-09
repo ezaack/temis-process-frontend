@@ -1,30 +1,15 @@
 import { useState } from 'react';
 import { 
   Paper,
-  Container,
   Typography,
   Box,
   Button,
   TextField,
   ToggleButtonGroup,
   ToggleButton,
-  Select,
-  MenuItem,
   InputLabel,
-  Stack,
-  Grid,
-  IconButton,
-  Tooltip,
-  Divider
-} from '@mui/material';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+  Stack} from '@mui/material';
 import { DocumentType, EnumLabels, PersonType, ContactType, AddressType, Country } from '../../components/shared/enums';
-import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
-import { DatePicker } from '@mui/x-date-pickers';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
@@ -188,6 +173,53 @@ export function ClientForm() {
     }
   };
 
+  const renderNameFields = () => {
+    if (!formData.personalData.personType) {
+      return null;
+    }
+
+    const isNaturalPerson = formData.personalData.personType === PersonType.NATURAL;
+
+    return (
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <TextField
+            fullWidth
+            required
+            label={isNaturalPerson ? "Nome Próprio" : "Razão Social"}
+            variant="outlined"
+            placeholder={isNaturalPerson ? "João" : "Empresa LTDA"}
+            value={formData.personalData.name || ''}
+            onChange={(e) => setFormData({
+              ...formData,
+              personalData: {
+                ...formData.personalData,
+                name: e.target.value
+              }
+            })}
+          />
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <TextField
+            fullWidth
+            required
+            label={isNaturalPerson ? "Sobrenome" : "Nome Fantasia"}
+            variant="outlined"
+            placeholder={isNaturalPerson ? "da Silva" : "Nome Fantasia"}
+            value={formData.personalData.namePart2 || ''}
+            onChange={(e) => setFormData({
+              ...formData,
+              personalData: {
+                ...formData.personalData,
+                namePart2: e.target.value
+              }
+            })}
+          />
+        </Box>
+      </Box>
+    );
+  };
+
   return (
     <Paper elevation={1}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 2 }}>
@@ -201,12 +233,6 @@ export function ClientForm() {
           <Stack spacing={3}>
             {/* Basic Information */}
             <Box>
-              {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <InputLabel>Breve descrição do cliente</InputLabel>
-                <Tooltip title="Uma breve explicação do cliente, como para qual empresa trabalha, ou uma desanbiguação para facilmente separa-lo de clientes homonimos">
-                  <HelpOutlineIcon fontSize="small" color="action" />
-                </Tooltip>
-              </Box> */}
               <TextField
                 fullWidth
                 label="Breve descrição do cliente"
@@ -238,7 +264,10 @@ export function ClientForm() {
                       ...formData,
                       personalData: {
                         ...formData.personalData,
-                        personType: newValue
+                        personType: newValue,
+                        name: null,
+                        namePart2: newValue === PersonType.NATURAL ? null : formData.personalData.namePart2,
+                        displayName: newValue === PersonType.LEGAL ? null : formData.personalData.displayName
                       }
                     });
                   }
@@ -256,35 +285,7 @@ export function ClientForm() {
               </ToggleButtonGroup>
             </Box>
 
-            {/* Personal Data */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Nome Próprio"
-                  variant="outlined"
-                  placeholder="João"
-                  value={formData.personalData.name}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    personalData: {...formData.personalData, name: e.target.value}
-                  })}
-                />
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Sobrenome"
-                  variant="outlined"
-                  placeholder="da Silva"
-                  value={formData.personalData.namePart2}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    personalData: {...formData.personalData, namePart2: e.target.value}
-                  })}
-                />
-              </Box>
-            </Box>
+            {renderNameFields()}
 
             <DocumentSection
               documents={formData.personalData.personalDocuments}

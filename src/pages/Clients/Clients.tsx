@@ -55,6 +55,15 @@ interface Client {
   };
 }
 
+// Add new interface for the paged response
+interface PagedResponse {
+  count: number;
+  pageSize: number;
+  currentPageIndex: number;
+  numberOfPages: number;
+  content: Client[]; // This will hold the array of clients
+}
+
 export function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
@@ -68,19 +77,19 @@ export function Clients() {
 
   const fetchClients = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/v0/clients/search', {
+      const response = await axios.post<PagedResponse>('http://localhost:8080/v0/clients/search', {
         pageIndex: page,
         pageSize: rowsPerPage,
         example: searchTerm ? {
           personalData: {
             name: searchTerm
           }
-        } : null
+        } : {}
       });
       
       console.log('API Response:', response.data);
-      setClients(response.data || []);
-      setTotalCount(response.data.length || 0);
+      setClients(response.data.content || []); // Update to use content array
+      setTotalCount(response.data.count || 0); // Update to use total count from response
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast.error('Erro ao carregar clientes');
@@ -198,15 +207,25 @@ export function Clients() {
               clients.map((clientData) => (
                 <TableRow key={clientData.id} hover>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                       {clientData.client.personalData.personType === PersonType.NATURAL ? (
                         <PersonIcon color="action" />
                       ) : (
                         <BusinessIcon color="action" />
                       )}
-                      <Typography>
-                        {`${clientData.client.personalData.name} ${clientData.client.personalData.namePart2 || ''}`}
-                      </Typography>
+                      <Box>
+                        <Typography>
+                          {clientData.client.personalData.name}
+                          {clientData.client.personalData.personType === PersonType.NATURAL && 
+                            ` ${clientData.client.personalData.namePart2 || ''}`
+                          }
+                        </Typography>
+                        {clientData.client.personalData.personType === PersonType.LEGAL && 
+                          <Typography variant="body2" color="text.secondary">
+                            {clientData.client.personalData.displayName || ''}
+                          </Typography>
+                        }
+                      </Box>
                     </Box>
                   </TableCell>
                   <TableCell>
