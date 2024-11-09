@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { 
   Paper,
   Typography,
@@ -45,6 +46,8 @@ interface Address {
 }
 
 export function ClientForm() {
+  const { id } = useParams();
+
   const [formData, setFormData] = useState<{
     description: string | null
     howDidYouHearAboutUs: string | null
@@ -97,6 +100,23 @@ export function ClientForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    const fetchClient = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(`http://localhost:8080/v0/clients/${id}`);
+          setFormData(response.data.client);
+          setSelectedPersonType(response.data.client.personalData.personType);
+        } catch (error) {
+          console.error('Error fetching client:', error);
+          toast.error('Erro ao carregar dados do cliente');
+        }
+      }
+    };
+
+    fetchClient();
+  }, [id]);
+
   const validateForm = () => {
     if (!formData.personalData.name) {
       toast.error('Nome é obrigatório');
@@ -115,7 +135,6 @@ export function ClientForm() {
 
     setIsSubmitting(true);
     try {
-      // Transform the form data to match API schema
       const payload = {
         description: formData.description,
         howDidYouHearAboutUs: formData.howDidYouHearAboutUs,
@@ -148,26 +167,21 @@ export function ClientForm() {
         }
       };
 
-      // Make the API call
-      const response = await axios.post('http://localhost:8080/v0/clients', payload, {
+      const response = await axios({
+        method: id ? 'put' : 'post',
+        url: 'http://localhost:8080/v0/clients',
+        data: id ? { id, client: payload } : payload,
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
       if (response.status === 200) {
-        // Handle success
-        console.log('Client created successfully:', response.data);
-        // You might want to show a success message or redirect
-        toast.success('Cliente criado com sucesso!');
-        // Optional: redirect to clients list
-        // navigate('/clients');
+        toast.success(`Cliente ${id ? 'atualizado' : 'criado'} com sucesso!`);
       }
     } catch (error) {
-      // Handle error
-      console.error('Error creating client:', error);
-      // Show error message to user
-      toast.error('Erro ao criar cliente. Por favor, tente novamente.');
+      console.error('Error saving client:', error);
+      toast.error(`Erro ao ${id ? 'atualizar' : 'criar'} cliente`);
     } finally {
       setIsSubmitting(false);
     }

@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  MenuItem,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -64,11 +65,21 @@ interface PagedResponse {
   content: Client[]; // This will hold the array of clients
 }
 
+interface Filters {
+  name: string;
+  document: string;
+  personType: PersonType | '';
+}
+
 export function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Filters>({
+    name: '',
+    document: '',
+    personType: ''
+  });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -80,16 +91,19 @@ export function Clients() {
       const response = await axios.post<PagedResponse>('http://localhost:8080/v0/clients/search', {
         pageIndex: page,
         pageSize: rowsPerPage,
-        example: searchTerm ? {
+        example: {
           personalData: {
-            name: searchTerm
+            name: filters.name || undefined,
+            personType: filters.personType || undefined,
+            personalDocuments: filters.document ? [{
+              value: filters.document
+            }] : undefined
           }
-        } : {}
+        }
       });
       
-      console.log('API Response:', response.data);
-      setClients(response.data.content || []); // Update to use content array
-      setTotalCount(response.data.count || 0); // Update to use total count from response
+      setClients(response.data.content || []);
+      setTotalCount(response.data.count || 0);
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast.error('Erro ao carregar clientes');
@@ -100,7 +114,7 @@ export function Clients() {
 
   useEffect(() => {
     fetchClients();
-  }, [page, rowsPerPage, searchTerm]);
+  }, [page, rowsPerPage, filters]);
 
   const handleDeleteClick = (id: string) => {
     setClientToDelete(id);
@@ -131,6 +145,16 @@ export function Clients() {
     setPage(0);
   };
 
+  const handleFilterChange = (field: keyof Filters) => (
+    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+  ) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+    setPage(0);
+  };
+
   return (
     <Box>
       {/* Header */}
@@ -152,11 +176,11 @@ export function Clients() {
         <CardContent>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              fullWidth
-              placeholder="Buscar clientes..."
+              label="Nome"
+              placeholder="Buscar por nome..."
               variant="outlined"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.name}
+              onChange={handleFilterChange('name')}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -165,6 +189,24 @@ export function Clients() {
                 ),
               }}
             />
+            <TextField
+              label="Documento"
+              placeholder="CPF/CNPJ..."
+              variant="outlined"
+              value={filters.document}
+              onChange={handleFilterChange('document')}
+            />
+            <TextField
+              select
+              label="Tipo de Pessoa"
+              value={filters.personType}
+              onChange={handleFilterChange('personType')}
+              sx={{ minWidth: 200 }}
+            >
+              <MenuItem value="">Todos</MenuItem>
+              <MenuItem value={PersonType.NATURAL}>Pessoa Física</MenuItem>
+              <MenuItem value={PersonType.LEGAL}>Pessoa Jurídica</MenuItem>
+            </TextField>
           </Box>
         </CardContent>
       </Card>
@@ -205,7 +247,12 @@ export function Clients() {
               </TableRow>
             ) : (
               clients.map((clientData) => (
-                <TableRow key={clientData.id} hover>
+                <TableRow 
+                  key={clientData.id} 
+                  hover 
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/clients/${clientData.id}`)}
+                >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                       {clientData.client.personalData.personType === PersonType.NATURAL ? (

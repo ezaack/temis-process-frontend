@@ -17,6 +17,7 @@ import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
 import { Clients } from './pages/Clients/Clients';
 import { ClientForm } from './pages/Clients/ClientForm';
+import { ClientDetail } from './pages/Clients/ClientDetail';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,6 +56,15 @@ function App() {
         />
         <Route
           path="/client-form"
+          element={
+            <>
+              <PageTitle title="Client Form" />
+              <ClientForm/>
+            </>
+          }
+        />
+        <Route
+          path="/client-form/:id"
           element={
             <>
               <PageTitle title="Client Form" />
@@ -134,6 +144,7 @@ function App() {
             </>
           }
         />
+        <Route path="/clients/:id" element={<ClientDetail />} />
       </Routes>
       <ToastContainer />
     </DefaultLayout>
