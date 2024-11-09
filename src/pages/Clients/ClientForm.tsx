@@ -28,6 +28,9 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
+import { DocumentSection } from '../../components/ClientForm/DocumentSection';
+import { ContactSection } from '../../components/ClientForm/ContactSection';
+import { AddressSection } from '../../components/ClientForm/AddressSection';
 
 // Add this interface near the top of your file, before the ClientForm component
 interface PersonalDocument {
@@ -71,25 +74,25 @@ export function ClientForm() {
       personalDocuments: PersonalDocument[];
     };
   }>({
-    description: '',
-    howDidYouHearAboutUs: '',
+    description: null,
+    howDidYouHearAboutUs: null,
     personalData: {
-      name: '',
-      namePart2: '',
-      displayName: '',
-      birthDate: '',
+      name: null,
+      namePart2: null,
+      displayName: null,
+      birthDate: null,
       personType: undefined,
       contacts: [
         // { type: 'PERSONAL_CELL_PHONE', value: '' }
       ],
       addresses: [
       //   {
-      //   street: '',
-      //   complement: '',
-      //   number: '',
+      //   street: null,
+      //   complement: null,
+      //   number: null,
       //   country: 'BRAZIL',
-      //   state: '',
-      //   city: '',
+      //   state: null,
+      //   city: null,
       //   addressType: 'HOME',
       //   zipCode: ''
       // }
@@ -97,7 +100,7 @@ export function ClientForm() {
       personalDocuments: [
       //   {
       //   type: 'CPF',
-      //   value: '',
+      //   value: null,
       //   issuingDate: null,
       //   issuingAgency: ''
       // }
@@ -283,452 +286,38 @@ export function ClientForm() {
               </Box>
             </Box>
 
-            {/* Personal Documents */}
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', xd: 12, md: 5,  mb: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      personalData: {
-                        ...formData.personalData,
-                        personalDocuments: [
-                          ...formData.personalData.personalDocuments,
-                          { type: DocumentType.CPF, value: '', issuingDate: null, issuingAgency: '' }
-                        ]
-                      }
-                    });
-                  }}
-                >
-                  Adicionar Documento
-                </Button>
-              </Box>
+            <DocumentSection
+              documents={formData.personalData.personalDocuments}
+              onChange={(newDocuments) => setFormData({
+                ...formData,
+                personalData: {
+                  ...formData.personalData,
+                  personalDocuments: newDocuments
+                }
+              })}
+            />
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {formData.personalData.personalDocuments.map((document, index) => (
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <Box sx={{ flex: 1 }}>
-                        <Select
-                          fullWidth
-                          variant="outlined"
-                          value={document.type}
-                          onChange={(e) => {
-                            const newDocs = [...formData.personalData.personalDocuments];
-                            newDocs[index] = { ...document, type: e.target.value as DocumentType };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                personalDocuments: newDocs
-                              }
-                            });
-                          }}
-                        >
-                          {Object.values(DocumentType).map((documentType) => (
-                            <MenuItem key={documentType} value={documentType}>
-                              {EnumLabels.DocumentType[documentType]}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Box>
-                      <Box sx={{ flex: 3 }}>
-                        <TextField
-                          fullWidth
-                          label="Número do Documento"
-                          variant="outlined"
-                          value={document.value}
-                          onChange={(e) => {
-                            const newDocs = [...formData.personalData.personalDocuments];
-                            newDocs[index] = { ...document, value: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                personalDocuments: newDocs
-                              }
-                            });
-                          }}
-                        />
-                      </Box>
-                      <Box sx={{flex: 1}}>
-                      <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DatePicker
-                          label="Data de Emissão"
-                          value={document.issuingDate}
-                          onChange={(newDate) => {
-                            const newDocs = [...formData.personalData.personalDocuments];
-                            newDocs[index] = { ...document, issuingDate: newDate };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                personalDocuments: newDocs
-                              }
-                            });
-                          }}
-                        />
-                        </LocalizationProvider>
-                      </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <TextField
-                          fullWidth
-                          label="Órgão Emissor"
-                          variant="outlined"
-                          value={document.issuingAgency}
-                        />
-                      </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <IconButton
-                          color="error"
-                          onClick={() => {
-                            const newDocs = formData.personalData.personalDocuments.filter((_, i) => i !== index);
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                personalDocuments: newDocs
-                              }
-                            });
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </Box>
-                ))}
-              </Box>
-            </Box>
+            <ContactSection
+              contacts={formData.personalData.contacts}
+              onChange={(newContacts) => setFormData({
+                ...formData,
+                personalData: {
+                  ...formData.personalData,
+                  contacts: newContacts
+                }
+              })}
+            />
 
-            {/* Contacts */}
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      personalData: {
-                        ...formData.personalData,
-                        contacts: [
-                          ...formData.personalData.contacts,
-                          { type: ContactType.PERSONAL_CELL_PHONE, value: '' }
-                        ]
-                      }
-                    });
-                  }}
-                >
-                  Adicionar Contato
-                </Button>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {formData.personalData.contacts.map((contact, index) => (
-                  <Box key={index} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Select
-                        fullWidth
-                        variant="outlined"
-                        value={contact.type}
-                        onChange={(e) => {
-                          const newContacts = [...formData.personalData.contacts];
-                          newContacts[index] = { ...contact, type: e.target.value as ContactType };
-                          setFormData({
-                            ...formData,
-                            personalData: {
-                              ...formData.personalData,
-                              contacts: newContacts
-                            }
-                          });
-                        }}
-                      >
-                        {Object.values(ContactType).map((contactType) => (
-                          <MenuItem key={contactType} value={contactType}>
-                            {EnumLabels.ContactType[contactType]}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Box>
-                    <Box sx={{ flex: 2 }}>
-                      <TextField
-                        fullWidth
-                        label={contact.type.includes('EMAIL') ? 'Email' : 'Número'}
-                        variant="outlined"
-                        value={contact.value}
-                        onChange={(e) => {
-                          const newContacts = [...formData.personalData.contacts];
-                          newContacts[index] = { ...contact, value: e.target.value };
-                          setFormData({
-                            ...formData,
-                            personalData: {
-                              ...formData.personalData,
-                              contacts: newContacts
-                            }
-                          });
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          const newContacts = formData.personalData.contacts.filter((_, i) => i !== index);
-                          setFormData({
-                            ...formData,
-                            personalData: {
-                              ...formData.personalData,
-                              contacts: newContacts
-                            }
-                          });
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-
-            {/* Addresses */}
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      personalData: {
-                        ...formData.personalData,
-                        addresses: [
-                          ...formData.personalData.addresses,
-                          {
-                            street: '',
-                            number: '',
-                            complement: '',
-                            neighborhood: '',
-                            city: '',
-                            state: '',
-                            country: Country.BRAZIL,
-                            zipCode: '',
-                            addressType: AddressType.HOME
-                          }
-                        ]
-                      }
-                    });
-                  }}
-                >
-                  Adicionar Endereço
-                </Button>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {formData.personalData.addresses.map((address, index) => (
-                  <Paper key={index} elevation={0} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-                        <Select
-                          size="small"
-                          value={address.addressType}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, addressType: e.target.value as AddressType };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        >
-                          {Object.values(AddressType).map((type) => (
-                            <MenuItem key={type} value={type}>
-                              {EnumLabels.AddressType[type]}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <IconButton
-                          color="error"
-                          onClick={() => {
-                            const newAddresses = formData.personalData.addresses.filter((_, i) => i !== index);
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid>
-
-                      <Grid item xs={12} md={3}>
-                        <TextField
-                          fullWidth
-                          label="CEP"
-                          value={address.zipCode}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, zipCode: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={7}>
-                        <TextField
-                          fullWidth
-                          label="Rua"
-                          value={address.street}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, street: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={2}>
-                        <TextField
-                          fullWidth
-                          label="Número"
-                          value={address.number}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, number: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Complemento"
-                          value={address.complement}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, complement: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Bairro"
-                          value={address.neighborhood}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, neighborhood: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Cidade"
-                          value={address.city}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, city: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Estado"
-                          value={address.state}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, state: e.target.value };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <Select
-                          fullWidth
-                          value={address.country}
-                          onChange={(e) => {
-                            const newAddresses = [...formData.personalData.addresses];
-                            newAddresses[index] = { ...address, country: e.target.value as Country };
-                            setFormData({
-                              ...formData,
-                              personalData: {
-                                ...formData.personalData,
-                                addresses: newAddresses
-                              }
-                            });
-                          }}
-                        >
-                          {Object.values(Country).map((country) => (
-                            <MenuItem key={country} value={country}>
-                              {EnumLabels.Country[country]}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Grid>
-                    </Grid>
-                  </Paper>
-                ))}
-              </Box>
-            </Box>
+            <AddressSection
+              addresses={formData.personalData.addresses}
+              onChange={(newAddresses) => setFormData({
+                ...formData,
+                personalData: {
+                  ...formData.personalData,
+                  addresses: newAddresses
+                }
+              })}
+            />
 
             {/* Submit Button */}
             <Box sx={{ mt: 2 }}>

@@ -89,6 +89,35 @@ export const EnumLabels = {
   },
   Country: {
     [Country.BRAZIL]: 'Brasil'
+  },
+  State: {
+    [State.AMAZONAS]: 'Amazonas',
+    [State.ALAGOAS]: 'Alagoas',
+    [State.ACRE]: 'Acre',
+    [State.AMAPA]: 'Amapá',
+    [State.BAHIA]: 'Bahia',
+    [State.PARA]: 'Pará',
+    [State.MATO_GROSSO]: 'Mato Grosso',
+    [State.MINAS_GERAIS]: 'Minas Gerais',
+    [State.MATO_GROSSO_DO_SUL]: 'Mato Grosso do Sul',
+    [State.GOIAS]: 'Goiás',
+    [State.MARANHAO]: 'Maranhão',
+    [State.RIO_GRANDE_DO_SUL]: 'Rio Grande do Sul',
+    [State.TOCANTINS]: 'Tocantins',
+    [State.PIAUI]: 'Piauí',
+    [State.SAO_PAULO]: 'São Paulo',
+    [State.RONDONIA]: 'Rondônia',
+    [State.RORAIMA]: 'Roraima',
+    [State.PARANA]: 'Paraná',
+    [State.CEARA]: 'Ceará',
+    [State.PERNAMBUCO]: 'Pernambuco',
+    [State.SANTA_CATARINA]: 'Santa Catarina',
+    [State.PARAIBA]: 'Paraíba',
+    [State.RIO_GRANDE_DO_NORTE]: 'Rio Grande do Norte',
+    [State.ESPIRITO_SANTO]: 'Espírito Santo',
+    [State.RIO_DE_JANEIRO]: 'Rio de Janeiro',
+    [State.SERGIPE]: 'Sergipe',
+    [State.DISTRITO_FEDERAL]: 'Distrito Federal'
   }
 } as const;
 
@@ -110,3 +139,26 @@ export const getEnumOptions = <T extends { [key: string]: string }>(
 //   { value: 'WORK', label: 'Trabalho' },
 //   { value: 'OTHER', label: 'Outro' }
 // ] 
+
+export const DocumentPatterns = {
+  [DocumentType.CPF]: '999.999.999-99',
+  [DocumentType.CNPJ]: '99.999.999/9999-99',
+  [DocumentType.ID]: '99.999.999-9',
+  [DocumentType.PASSPORT]: 'AA999999',
+  [DocumentType.DRIVER_LICENSE]: '99999999999'
+} as const;
+
+export const ContactPatterns = {
+  [ContactType.PERSONAL_CELL_PHONE]: '(99) 99999-9999',
+  [ContactType.WORK_CELL_PHONE]: '(99) 99999-9999',
+  [ContactType.HOME_PHONE]: '(99) 9999-9999',
+  [ContactType.WORK_PHONE]: '(99) 9999-9999',
+  [ContactType.PERSONAL_EMAIL]: 'email',
+  [ContactType.WORK_EMAIL]: 'email'
+} as const;
+
+// Add validation patterns for email
+export const ValidationPatterns = {
+  email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  zipCode: '99999-999'
+} as const;

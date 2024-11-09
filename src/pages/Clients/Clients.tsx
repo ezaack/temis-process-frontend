@@ -19,6 +19,10 @@ import {
   Skeleton,
   Card,
   CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -59,6 +63,8 @@ export function Clients() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
 
   const fetchClients = async () => {
     try {
@@ -87,10 +93,15 @@ export function Clients() {
     fetchClients();
   }, [page, rowsPerPage, searchTerm]);
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
+  const handleDeleteClick = (id: string) => {
+    setClientToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (clientToDelete) {
       try {
-        await axios.delete(`http://localhost:8080/v0/clients?id=${id}`);
+        await axios.delete(`http://localhost:8080/v0/clients?id=${clientToDelete}`);
         toast.success('Cliente excluído com sucesso');
         fetchClients();
       } catch (error) {
@@ -98,6 +109,8 @@ export function Clients() {
         toast.error('Erro ao excluir cliente');
       }
     }
+    setDeleteDialogOpen(false);
+    setClientToDelete(null);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -232,7 +245,7 @@ export function Clients() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDelete(clientData.id)}
+                          onClick={() => handleDeleteClick(clientData.id)}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -255,6 +268,22 @@ export function Clients() {
           labelRowsPerPage="Itens por página"
         />
       </TableContainer>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirmar Exclusão</DialogTitle>
+        <DialogContent>
+          Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Excluir
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
