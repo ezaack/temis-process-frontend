@@ -107,12 +107,12 @@ export function ClientDetail() {
       <Box sx={{ 
         flex: 1, 
         overflow: 'auto', 
-        p: 3,
+        p: 2,
         mr: '300px',
         maxWidth: 'calc(100vw - 300px)'
       }}>
         {/* Basic Information Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <DescriptionIcon />
             Informações Básicas
@@ -156,7 +156,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Documents Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <AssignmentIcon />
             Documentação
@@ -188,7 +188,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Contacts Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <PhoneIcon />
             Informações de Contato
@@ -217,7 +217,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Addresses Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <LocationIcon />
             Endereços
@@ -264,7 +264,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Processos Ativos Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <GavelIcon />
             Processos Ativos
@@ -284,7 +284,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Últimos Andamentos Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <HistoryIcon />
             Últimos Andamentos
@@ -321,7 +321,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Documentos Jurídicos Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <AssignmentIcon />
             Documentos Jurídicos
@@ -357,7 +357,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Honorários e Pagamentos Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <AttachMoneyIcon />
             Honorários e Pagamentos
@@ -393,7 +393,7 @@ export function ClientDetail() {
         </Paper>
 
         {/* Próximos Compromissos Card */}
-        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <ScheduleIcon />
             Próximos Compromissos
