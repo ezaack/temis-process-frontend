@@ -14,36 +14,7 @@ import { DocumentType, EnumLabels, PersonType, ContactType, AddressType, Country
 import axios from 'axios';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
-import { DocumentSection } from '../../components/ClientForm/DocumentSection';
-import { ContactSection } from '../../components/ClientForm/ContactSection';
-import { AddressSection } from '../../components/ClientForm/AddressSection';
-
-// Add this interface near the top of your file, before the ClientForm component
-interface PersonalDocument {
-  type: DocumentType;
-  value: string | null
-  issuingDate: Date | null;
-  issuingAgency: string | null
-}
-
-// Add this interface
-interface Contact {
-  type: ContactType;
-  value: string | null;
-}
-
-// Add this interface
-interface Address {
-  street: string | null;
-  number: string | null;
-  complement: string | null;
-  neighborhood: string | null;
-  city: string | null;
-  state: string | null;
-  country: Country;
-  zipCode: string | null;
-  addressType: AddressType;
-}
+import { PersonalDataSection } from '../../components/ClientForm/PersonalDataSection';
 
 export function ClientForm() {
   const { id } = useParams();
@@ -187,53 +158,6 @@ export function ClientForm() {
     }
   };
 
-  const renderNameFields = () => {
-    if (!formData.personalData.personType) {
-      return null;
-    }
-
-    const isNaturalPerson = formData.personalData.personType === PersonType.NATURAL;
-
-    return (
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <TextField
-            fullWidth
-            required
-            label={isNaturalPerson ? "Nome Próprio" : "Razão Social"}
-            variant="outlined"
-            placeholder={isNaturalPerson ? "João" : "Empresa LTDA"}
-            value={formData.personalData.name || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              personalData: {
-                ...formData.personalData,
-                name: e.target.value
-              }
-            })}
-          />
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <TextField
-            fullWidth
-            required
-            label={isNaturalPerson ? "Sobrenome" : "Nome Fantasia"}
-            variant="outlined"
-            placeholder={isNaturalPerson ? "da Silva" : "Nome Fantasia"}
-            value={formData.personalData.namePart2 || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              personalData: {
-                ...formData.personalData,
-                namePart2: e.target.value
-              }
-            })}
-          />
-        </Box>
-      </Box>
-    );
-  };
-
   return (
     <Paper elevation={1}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 2 }}>
@@ -299,38 +223,11 @@ export function ClientForm() {
               </ToggleButtonGroup>
             </Box>
 
-            {renderNameFields()}
-
-            <DocumentSection
-              documents={formData.personalData.personalDocuments}
-              onChange={(newDocuments) => setFormData({
+            <PersonalDataSection
+              personalData={formData.personalData}
+              onChange={(newPersonalData) => setFormData({
                 ...formData,
-                personalData: {
-                  ...formData.personalData,
-                  personalDocuments: newDocuments
-                }
-              })}
-            />
-
-            <ContactSection
-              contacts={formData.personalData.contacts}
-              onChange={(newContacts) => setFormData({
-                ...formData,
-                personalData: {
-                  ...formData.personalData,
-                  contacts: newContacts
-                }
-              })}
-            />
-
-            <AddressSection
-              addresses={formData.personalData.addresses}
-              onChange={(newAddresses) => setFormData({
-                ...formData,
-                personalData: {
-                  ...formData.personalData,
-                  addresses: newAddresses
-                }
+                personalData: newPersonalData
               })}
             />
 
