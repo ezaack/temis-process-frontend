@@ -263,6 +263,61 @@ export function ClientDetail() {
           </Box>
         </Paper>
 
+        {/* Representatives Card */}
+        <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon />
+            Representantes
+          </Typography>
+          {client.personalData.representatives && client.personalData.representatives.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {client.personalData.representatives.map((representative, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 2,
+                    bgcolor: 'grey.50',
+                    borderRadius: 1,
+                    position: 'relative'
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      bgcolor: 'background.paper',
+                      px: 1,
+                      borderRadius: 1,
+                      border: 1,
+                      borderColor: 'divider'
+                    }}
+                  >
+                    {EnumLabels.RepresentativeType[representative.representativeType]}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+                    {representative.personalData.name} {representative.personalData.namePart2}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Nenhum representante no momento
+              </Typography>
+            </Box>
+          )}
+          <Button
+            startIcon={<FolderSpecialIcon />}
+            variant="outlined"
+            size="small"
+          >
+            Novo Representante
+          </Button>
+        </Paper>
+
         {/* Processos Ativos Card */}
         <Paper elevation={1} sx={{ p: 2.5, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>

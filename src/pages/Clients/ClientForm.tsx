@@ -16,6 +16,46 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { PersonalDataSection } from '../../components/ClientForm/PersonalDataSection';
 
+interface Contact {
+  type: ContactType;
+  value: string;
+}
+
+interface Address {
+  street: string | null;
+  complement: string | null;
+  number: string | null;
+  country: Country;
+  state: string | null;
+  city: string | null;
+  addressType: AddressType;
+  zipCode: string;
+}
+
+interface PersonalDocument {
+  type: DocumentType;
+  value: string | null;
+  issuingDate: Date | null;
+  issuingAgency: string;
+}
+
+interface Representative {
+  representativeType: 'PROXY' | 'ATTOURNEY_IN_FACT' | 'LEGAL_GUARDIAN' | 'CURATOR' | 
+    'LEGAL_REPRESENTATIVE' | 'ADMINISTRATOR' | 'MANAGER' | 'DIRECTOR' | 'CEO' | 
+    'CFO' | 'PRESIDENT' | 'BOARD_MEMBER';
+  personalData: {
+    name: string | null;
+    namePart2: string | null;
+    displayName: string | null;
+    birthDate: string | null;
+    personType: PersonType | undefined;
+    contacts: Contact[];
+    addresses: Address[];
+    personalDocuments: PersonalDocument[];
+    representatives?: Representative[];
+  };
+}
+
 export function ClientForm() {
   const { id } = useParams();
 
@@ -31,6 +71,7 @@ export function ClientForm() {
       contacts: Contact[];
       addresses: Address[];
       personalDocuments: PersonalDocument[];
+      representatives: Representative[];
     };
   }>({
     description: null,
@@ -63,7 +104,8 @@ export function ClientForm() {
       //   issuingDate: null,
       //   issuingAgency: ''
       // }
-    ]
+    ],
+      representatives: []
     }
   });
 
@@ -105,7 +147,47 @@ export function ClientForm() {
     }
 
     setIsSubmitting(true);
+    console.log('Form Data Representatives:', formData.personalData.representatives);
+
     try {
+      // Create a copy of the representatives first
+      const mappedRepresentatives = formData.personalData.representatives.map(rep => {
+        console.log('Processing representative:', rep);
+        return {
+          representativeType: rep.representativeType,
+          personalData: {
+            name: rep.personalData.name,
+            namePart2: rep.personalData.namePart2,
+            displayName: rep.personalData.displayName,
+            birthDate: rep.personalData.birthDate,
+            personType: rep.personalData.personType,
+            contacts: rep.personalData.contacts?.map(contact => ({
+              type: contact.type,
+              value: contact.value
+            })) || [],
+            addresses: rep.personalData.addresses?.map(address => ({
+              street: address.street,
+              number: address.number,
+              complement: address.complement,
+              country: address.country,
+              state: address.state,
+              city: address.city,
+              addressType: address.addressType,
+              zipCode: address.zipCode
+            })) || [],
+            personalDocuments: rep.personalData.personalDocuments?.map(doc => ({
+              type: doc.type,
+              value: doc.value,
+              issuingDate: doc.issuingDate ? format(doc.issuingDate, 'yyyy-MM-dd') : null,
+              issuingAgency: doc.issuingAgency
+            })) || [],
+            representatives: [] // Empty array for nested representatives
+          }
+        };
+      });
+
+      console.log('Mapped Representatives:', mappedRepresentatives);
+
       const payload = {
         description: formData.description,
         howDidYouHearAboutUs: formData.howDidYouHearAboutUs,
@@ -134,9 +216,12 @@ export function ClientForm() {
             value: doc.value,
             issuingDate: doc.issuingDate ? format(doc.issuingDate, 'yyyy-MM-dd') : null,
             issuingAgency: doc.issuingAgency
-          }))
+          })),
+          representatives: mappedRepresentatives // Use the mapped representatives here
         }
       };
+
+      console.log('Final Payload:', payload);
 
       const response = await axios({
         method: id ? 'put' : 'post',
@@ -176,7 +261,7 @@ export function ClientForm() {
                 label="Breve descrição do cliente"
                 variant="outlined"
                 placeholder="Insira uma breve descrição"
-                value={formData.description}
+                value={formData.description ?? ''}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
               />
             </Box>
@@ -186,7 +271,7 @@ export function ClientForm() {
               label="Como nos conheceu?"
               variant="outlined"
               placeholder="Pesquisa no google, campanhar de facebook, campanha de instagram etc"
-              value={formData.howDidYouHearAboutUs}
+              value={formData.howDidYouHearAboutUs ?? ''}
               onChange={(e) => setFormData({...formData, howDidYouHearAboutUs: e.target.value})}
             />
 
