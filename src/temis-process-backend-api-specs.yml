@@ -1,0 +1,350 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /v0/clients:
+    put:
+      tags:
+      - client-controller
+      operationId: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+    post:
+      tags:
+      - client-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+    delete:
+      tags:
+      - client-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
+  /v0/clients/search:
+    post:
+      tags:
+      - client-controller
+      operationId: search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PagedFilterClientResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseClientResponse"
+  /v0/clients/{id}:
+    get:
+      tags:
+      - client-controller
+      operationId: fetchById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+components:
+  schemas:
+    AddressResource:
+      type: object
+      properties:
+        street:
+          type: string
+        complement:
+          type: string
+        number:
+          type: string
+        asOf:
+          type: string
+        country:
+          type: string
+          enum:
+          - BRAZIL
+        state:
+          type: string
+          enum:
+          - AMAZONAS
+          - ALAGOAS
+          - ACRE
+          - AMAPA
+          - BAHIA
+          - PARA
+          - MATO_GROSSO
+          - MINAS_GERAIS
+          - MATO_GROSSO_DO_SUL
+          - GOIAS
+          - MARANHAO
+          - RIO_GRANDE_DO_SUL
+          - TOCANTINS
+          - PIAUI
+          - SAO_PAULO
+          - RONDONIA
+          - RORAIMA
+          - PARANA
+          - CEARA
+          - PERNAMBUCO
+          - SANTA_CATARINA
+          - PARAIBA
+          - RIO_GRANDE_DO_NORTE
+          - ESPIRITO_SANTO
+          - RIO_DE_JANEIRO
+          - SERGIPE
+          - DISTRITO_FEDERAL
+        city:
+          type: string
+        addressType:
+          type: string
+          enum:
+          - HOME
+          - WORK
+          - OTHER
+        zipCode:
+          type: string
+    ClientResource:
+      type: object
+      properties:
+        description:
+          type: string
+        howDidYouHearAboutUs:
+          type: string
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+    ClientUpdateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        client:
+          $ref: "#/components/schemas/ClientResource"
+        representatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepresentativeUpdateResource"
+    ContactDataResource:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - PERSONAL_CELL_PHONE
+          - PERSONAL_EMAIL
+          - PERSONAL_HOME_PHONE
+          - WORK_CELL_PHONE
+          - WORK_EMAIL
+          - PROFESSIONAL_PHONE
+        value:
+          type: string
+    PersonalDataResource:
+      type: object
+      properties:
+        name:
+          type: string
+        namePart2:
+          type: string
+        displayName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        personType:
+          type: string
+          enum:
+          - NATURAL
+          - LEGAL
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactDataResource"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/AddressResource"
+        personalDocuments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonalDocumentResource"
+    PersonalDocumentResource:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - CPF
+          - CNPJ
+          - ID
+          - PASSPORT
+          - DRIVER_LICENSE
+        value:
+          type: string
+        issuingDate:
+          type: string
+          format: date
+        issuingAgency:
+          type: string
+    RepresentativeUpdateResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        representativeType:
+          type: string
+          enum:
+          - PROXY
+          - ATTOURNEY_IN_FACT
+          - LEGAL_GUARDIAN
+          - CURATOR
+          - LEGAL_REPRESENTATIVE
+          - ADMINISTRATOR
+          - MANAGER
+          - DIRECTOR
+          - CEO
+          - CFO
+          - PRESIDENT
+          - BOARD_MEMBER
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+    ClientResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        client:
+          $ref: "#/components/schemas/ClientResource"
+        representatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepresentativeResponse"
+    RepresentativeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        representativeType:
+          type: string
+          enum:
+          - PROXY
+          - ATTOURNEY_IN_FACT
+          - LEGAL_GUARDIAN
+          - CURATOR
+          - LEGAL_REPRESENTATIVE
+          - ADMINISTRATOR
+          - MANAGER
+          - DIRECTOR
+          - CEO
+          - CFO
+          - PRESIDENT
+          - BOARD_MEMBER
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+    ClientCreateRequest:
+      type: object
+      properties:
+        client:
+          $ref: "#/components/schemas/ClientResource"
+        representatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepresentativeResource"
+    RepresentativeResource:
+      type: object
+      properties:
+        representativeType:
+          type: string
+          enum:
+          - PROXY
+          - ATTOURNEY_IN_FACT
+          - LEGAL_GUARDIAN
+          - CURATOR
+          - LEGAL_REPRESENTATIVE
+          - ADMINISTRATOR
+          - MANAGER
+          - DIRECTOR
+          - CEO
+          - CFO
+          - PRESIDENT
+          - BOARD_MEMBER
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+    PagedFilterClientResource:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        example:
+          $ref: "#/components/schemas/ClientResource"
+    PagedResponseClientResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+        numberOfPages:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        currentPageIndex:
+          type: integer
+          format: int32

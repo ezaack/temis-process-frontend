@@ -9,7 +9,7 @@ import InputMask from 'react-input-mask';
 interface PersonalDocument {
   type: DocumentType;
   value: string | null;
-  issuingDate: Date | null;
+  issuingDate: string | null;
   issuingAgency: string | null;
 }
 
@@ -32,7 +32,14 @@ export function DocumentSection({ documents, onChange }: DocumentSectionProps) {
 
   const handleDocumentChange = (index: number, field: keyof PersonalDocument, value: any) => {
     const newDocs = [...documents];
-    newDocs[index] = { ...newDocs[index], [field]: value };
+    if (field === 'issuingDate' && value) {
+      newDocs[index] = { 
+        ...newDocs[index], 
+        [field]: value.toISOString().split('T')[0] 
+      };
+    } else {
+      newDocs[index] = { ...newDocs[index], [field]: value };
+    }
     onChange(newDocs);
   };
 
@@ -84,7 +91,7 @@ export function DocumentSection({ documents, onChange }: DocumentSectionProps) {
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Data de Emissão"
-                value={document.issuingDate}
+                value={document.issuingDate ? new Date(document.issuingDate) : null}
                 onChange={(date) => handleDocumentChange(index, 'issuingDate', date)}
                 slotProps={{ textField: { fullWidth: true } }}
               />

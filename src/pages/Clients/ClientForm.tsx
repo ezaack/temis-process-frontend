@@ -11,67 +11,31 @@ import {
   InputLabel,
   Stack} from '@mui/material';
 import { DocumentType, EnumLabels, PersonType, ContactType, AddressType, Country } from '../../components/shared/enums';
-import axios from 'axios';
-import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { PersonalDataSection } from '../../components/ClientForm/PersonalDataSection';
+import { clientService } from '../../components/ClientForm/clientService';
+import { AddressResource, PersonalDocumentResource, RepresentativeResource } from '../../components/ClientForm/api-types';
 
-interface Contact {
-  type: ContactType;
-  value: string;
-}
 
-interface Address {
-  street: string | null;
-  complement: string | null;
-  number: string | null;
-  country: Country;
-  state: string | null;
-  city: string | null;
-  addressType: AddressType;
-  zipCode: string;
-}
 
-interface PersonalDocument {
-  type: DocumentType;
-  value: string | null;
-  issuingDate: Date | null;
-  issuingAgency: string;
-}
 
-interface Representative {
-  representativeType: 'PROXY' | 'ATTOURNEY_IN_FACT' | 'LEGAL_GUARDIAN' | 'CURATOR' | 
-    'LEGAL_REPRESENTATIVE' | 'ADMINISTRATOR' | 'MANAGER' | 'DIRECTOR' | 'CEO' | 
-    'CFO' | 'PRESIDENT' | 'BOARD_MEMBER';
-  personalData: {
-    name: string | null;
-    namePart2: string | null;
-    displayName: string | null;
-    birthDate: string | null;
-    personType: PersonType | undefined;
-    contacts: Contact[];
-    addresses: Address[];
-    personalDocuments: PersonalDocument[];
-    representatives?: Representative[];
-  };
-}
 
 export function ClientForm() {
   const { id } = useParams();
 
   const [formData, setFormData] = useState<{
-    description: string | null
-    howDidYouHearAboutUs: string | null
+    description: string | null;
+    howDidYouHearAboutUs: string | null;
     personalData: {
-      name: string | null
-      namePart2: string | null
-      displayName: string | null
-      birthDate: string | null
+      name: string | null;
+      namePart2: string | null;
+      displayName: string | null;
+      birthDate: string | null;
       personType: PersonType | undefined;
-      contacts: Contact[];
-      addresses: Address[];
-      personalDocuments: PersonalDocument[];
-      representatives: Representative[];
+      contacts: ContactResource[];
+      addresses: AddressResource[];
+      personalDocuments: PersonalDocumentResource[];
+      representatives: RepresentativeResource[];
     };
   }>({
     description: null,
@@ -82,29 +46,9 @@ export function ClientForm() {
       displayName: null,
       birthDate: null,
       personType: undefined,
-      contacts: [
-        // { type: 'PERSONAL_CELL_PHONE', value: '' }
-      ],
-      addresses: [
-      //   {
-      //   street: null,
-      //   complement: null,
-      //   number: null,
-      //   country: 'BRAZIL',
-      //   state: null,
-      //   city: null,
-      //   addressType: 'HOME',
-      //   zipCode: ''
-      // }
-    ],
-      personalDocuments: [
-      //   {
-      //   type: 'CPF',
-      //   value: null,
-      //   issuingDate: null,
-      //   issuingAgency: ''
-      // }
-    ],
+      contacts: [],
+      addresses: [],
+      personalDocuments: [],
       representatives: []
     }
   });
@@ -117,9 +61,15 @@ export function ClientForm() {
     const fetchClient = async () => {
       if (id) {
         try {
-          const response = await axios.get(`http://localhost:8080/v0/clients/${id}`);
-          setFormData(response.data.client);
-          setSelectedPersonType(response.data.client.personalData.personType);
+          const response = await clientService.fetchById(id);
+          setFormData({
+            description: response.client.description,
+            howDidYouHearAboutUs: response.client.howDidYouHearAboutUs,
+            personalData: {
+              ...response.client.personalData,
+              representatives: response.representatives
+            }
+          });
         } catch (error) {
           console.error('Error fetching client:', error);
           toast.error('Erro ao carregar dados do cliente');
@@ -147,13 +97,25 @@ export function ClientForm() {
     }
 
     setIsSubmitting(true);
-    console.log('Form Data Representatives:', formData.personalData.representatives);
 
     try {
-      // Create a copy of the representatives first
-      const mappedRepresentatives = formData.personalData.representatives.map(rep => {
-        console.log('Processing representative:', rep);
-        return {
+      // Create the payload according to ClientCreateRequest/ClientUpdateRequest
+      const payload = {
+        client: {
+          description: formData.description,
+          howDidYouHearAboutUs: formData.howDidYouHearAboutUs,
+          personalData: {
+            name: formData.personalData.name,
+            namePart2: formData.personalData.namePart2,
+            displayName: formData.personalData.displayName,
+            birthDate: formData.personalData.birthDate,
+            personType: formData.personalData.personType,
+            contacts: formData.personalData.contacts,
+            addresses: formData.personalData.addresses,
+            personalDocuments: formData.personalData.personalDocuments
+          }
+        },
+        representatives: formData.personalData.representatives.map(rep => ({
           representativeType: rep.representativeType,
           personalData: {
             name: rep.personalData.name,
@@ -161,80 +123,19 @@ export function ClientForm() {
             displayName: rep.personalData.displayName,
             birthDate: rep.personalData.birthDate,
             personType: rep.personalData.personType,
-            contacts: rep.personalData.contacts?.map(contact => ({
-              type: contact.type,
-              value: contact.value
-            })) || [],
-            addresses: rep.personalData.addresses?.map(address => ({
-              street: address.street,
-              number: address.number,
-              complement: address.complement,
-              country: address.country,
-              state: address.state,
-              city: address.city,
-              addressType: address.addressType,
-              zipCode: address.zipCode
-            })) || [],
-            personalDocuments: rep.personalData.personalDocuments?.map(doc => ({
-              type: doc.type,
-              value: doc.value,
-              issuingDate: doc.issuingDate ? format(doc.issuingDate, 'yyyy-MM-dd') : null,
-              issuingAgency: doc.issuingAgency
-            })) || [],
-            representatives: [] // Empty array for nested representatives
+            contacts: rep.personalData.contacts,
+            addresses: rep.personalData.addresses,
+            personalDocuments: rep.personalData.personalDocuments
           }
-        };
-      });
-
-      console.log('Mapped Representatives:', mappedRepresentatives);
-
-      const payload = {
-        description: formData.description,
-        howDidYouHearAboutUs: formData.howDidYouHearAboutUs,
-        personalData: {
-          name: formData.personalData.name,
-          namePart2: formData.personalData.namePart2,
-          displayName: formData.personalData.displayName,
-          birthDate: formData.personalData.birthDate,
-          personType: formData.personalData.personType,
-          contacts: formData.personalData.contacts.map(contact => ({
-            type: contact.type,
-            value: contact.value
-          })),
-          addresses: formData.personalData.addresses.map(address => ({
-            street: address.street,
-            number: address.number,
-            complement: address.complement,
-            country: address.country,
-            state: address.state,
-            city: address.city,
-            addressType: address.addressType,
-            zipCode: address.zipCode
-          })),
-          personalDocuments: formData.personalData.personalDocuments.map(doc => ({
-            type: doc.type,
-            value: doc.value,
-            issuingDate: doc.issuingDate ? format(doc.issuingDate, 'yyyy-MM-dd') : null,
-            issuingAgency: doc.issuingAgency
-          })),
-          representatives: mappedRepresentatives // Use the mapped representatives here
-        }
+        }))
       };
 
-      console.log('Final Payload:', payload);
+      const response = await clientService[id ? 'update' : 'create'](
+        id ? { id, ...payload } : payload
+      );
 
-      const response = await axios({
-        method: id ? 'put' : 'post',
-        url: 'http://localhost:8080/v0/clients',
-        data: id ? { id, client: payload } : payload,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 200) {
-        toast.success(`Cliente ${id ? 'atualizado' : 'criado'} com sucesso!`);
-      }
+      toast.success(`Cliente ${id ? 'atualizado' : 'criado'} com sucesso!`);
+      navigate('/clients');
     } catch (error) {
       console.error('Error saving client:', error);
       toast.error(`Erro ao ${id ? 'atualizar' : 'criar'} cliente`);

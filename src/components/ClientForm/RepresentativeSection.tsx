@@ -7,22 +7,12 @@ import {
   IconButton,
   Divider
 } from '@mui/material';
-import { PersonType } from '../shared/enums';
+import { PersonType, RepresentativeType } from '../shared/enums';
 import { PersonalDataSection } from './PersonalDataSection';
 import { Add, Close as CloseIcon } from '@mui/icons-material';
-import { PersonalData } from './types';
+import { RepresentativeResource } from './api-types';
 
-interface Representative {
-  representativeType: 'PROXY' | 'ATTOURNEY_IN_FACT' | 'LEGAL_GUARDIAN' | 'CURATOR' | 
-    'LEGAL_REPRESENTATIVE' | 'ADMINISTRATOR' | 'MANAGER' | 'DIRECTOR' | 'CEO' | 
-    'CFO' | 'PRESIDENT' | 'BOARD_MEMBER';
-  personalData: PersonalData;
-}
 
-interface RepresentativeSectionProps {
-  representatives: Representative[];
-  onChange: (newRepresentatives: Representative[]) => void;
-}
 
 const representativeTypes = {
   PROXY: 'Procurador',
@@ -39,10 +29,15 @@ const representativeTypes = {
   BOARD_MEMBER: 'Membro do Conselho'
 };
 
+interface RepresentativeSectionProps {
+  representatives: RepresentativeResource[];
+  onChange: (newRepresentatives: RepresentativeResource[]) => void;
+}
+
 export function RepresentativeSection({ representatives, onChange }: RepresentativeSectionProps) {
   const handleAddRepresentative = () => {
     onChange([...representatives, {
-        representativeType: 'LEGAL_REPRESENTATIVE',
+        representativeType: RepresentativeType.LEGAL_REPRESENTATIVE,
         personalData: {
           name: null,
           namePart2: null,
@@ -51,8 +46,7 @@ export function RepresentativeSection({ representatives, onChange }: Representat
           personType: PersonType.NATURAL,
           contacts: [],
           addresses: [],
-          personalDocuments: [],
-          representatives: []
+          personalDocuments: []
         }}]);
   };
 
