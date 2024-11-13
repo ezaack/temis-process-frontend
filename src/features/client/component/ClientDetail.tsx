@@ -30,7 +30,8 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { PersonType, EnumLabels, ContactType } from '../../components/shared/enums';
+import { PersonType, EnumLabels, ContactType, RepresentativeType } from '../../../components/shared/enums';
+import { PersonalDataResource } from '../api/api-types';
 
 interface ClientDetailProps {
   id: string;
@@ -62,6 +63,10 @@ interface ClientDetailProps {
         value: string;
         issuingDate: string;
         issuingAgency: string;
+      }>;
+      representatives: Array<{
+        representativeType: RepresentativeType;
+        personalData: PersonalDataResource;
       }>;
     };
   };
@@ -269,9 +274,9 @@ export function ClientDetail() {
             <PersonIcon />
             Representantes
           </Typography>
-          {client.personalData.representatives && client.personalData.representatives.length > 0 ? (
+          {client.representatives && client.representatives.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {client.personalData.representatives.map((representative, index) => (
+              {client.representatives.map((representative, index) => (
                 <Box
                   key={index}
                   sx={{

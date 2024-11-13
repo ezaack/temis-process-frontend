@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, TextField, Select, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { DocumentType, EnumLabels, DocumentPatterns } from '../shared/enums';
+import { DocumentType, EnumLabels, DocumentPatterns } from '../../../components/shared/enums';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import InputMask from 'react-input-mask';

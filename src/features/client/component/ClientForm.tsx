@@ -10,11 +10,12 @@ import {
   ToggleButton,
   InputLabel,
   Stack} from '@mui/material';
-import { DocumentType, EnumLabels, PersonType, ContactType, AddressType, Country } from '../../components/shared/enums';
+import { EnumLabels, PersonType } from '../../../components/shared/enums';
 import { toast } from 'react-toastify';
-import { PersonalDataSection } from '../../components/ClientForm/PersonalDataSection';
-import { clientService } from '../../components/ClientForm/clientService';
-import { AddressResource, PersonalDocumentResource, RepresentativeResource } from '../../components/ClientForm/api-types';
+import { PersonalDataSection } from './PersonalDataSection';
+import { clientService } from '../api/clientService';
+import { AddressResource, ContactResource, PersonalDocumentResource, RepresentativeResource } from '../api/api-types';
+import { RepresentativeSection } from './RepresentativeSection';
 
 
 
@@ -35,8 +36,8 @@ export function ClientForm() {
       contacts: ContactResource[];
       addresses: AddressResource[];
       personalDocuments: PersonalDocumentResource[];
-      representatives: RepresentativeResource[];
     };
+    representatives: RepresentativeResource[];
   }>({
     description: null,
     howDidYouHearAboutUs: null,
@@ -48,9 +49,9 @@ export function ClientForm() {
       personType: undefined,
       contacts: [],
       addresses: [],
-      personalDocuments: [],
-      representatives: []
-    }
+      personalDocuments: []
+    },
+    representatives: []
   });
 
   const [selectedPersonType, setSelectedPersonType] = useState<PersonType>(PersonType.NATURAL);
@@ -65,9 +66,9 @@ export function ClientForm() {
           setFormData({
             description: response.client.description,
             howDidYouHearAboutUs: response.client.howDidYouHearAboutUs,
+            representatives: response.representatives,
             personalData: {
               ...response.client.personalData,
-              representatives: response.representatives
             }
           });
         } catch (error) {
@@ -115,7 +116,7 @@ export function ClientForm() {
             personalDocuments: formData.personalData.personalDocuments
           }
         },
-        representatives: formData.personalData.representatives.map(rep => ({
+        representatives: formData.representatives.map(rep => ({
           representativeType: rep.representativeType,
           personalData: {
             name: rep.personalData.name,
@@ -216,7 +217,15 @@ export function ClientForm() {
                 personalData: newPersonalData
               })}
             />
-
+             <RepresentativeSection
+              representatives={formData.representatives}
+              onChange={(newRepresentatives) => setFormData(
+                {
+                  ...formData,
+                  representatives: newRepresentatives
+                }
+              )}
+            />
             {/* Submit Button */}
             <Box sx={{ mt: 2 }}>
               <Button

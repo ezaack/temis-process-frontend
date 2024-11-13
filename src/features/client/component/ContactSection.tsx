@@ -2,7 +2,7 @@ import { Box, Button, IconButton, TextField, Select, MenuItem } from '@mui/mater
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InputMask from 'react-input-mask';
-import { ContactType, EnumLabels, ContactPatterns, ValidationPatterns } from '../shared/enums';
+import { ContactType, EnumLabels, ContactPatterns, ValidationPatterns } from '../../../components/shared/enums';
 
 interface Contact {
   type: ContactType;

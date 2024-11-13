@@ -15,9 +15,11 @@ import Settings from './pages/Settings';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
-import { Clients } from './pages/Clients/Clients';
-import { ClientForm } from './pages/Clients/ClientForm';
-import { ClientDetail } from './pages/Clients/ClientDetail';
+import { ClientForm } from './features/client/component/ClientForm';
+import { Clients } from './features/client/component/Clients';
+import { ClientDetail } from './features/client/component/ClientDetail';
+
+
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);

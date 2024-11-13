@@ -7,10 +7,10 @@ import {
   IconButton,
   Divider
 } from '@mui/material';
-import { PersonType, RepresentativeType } from '../shared/enums';
+import { PersonType, RepresentativeType } from '../../../components/shared/enums';
 import { PersonalDataSection } from './PersonalDataSection';
 import { Add, Close as CloseIcon } from '@mui/icons-material';
-import { RepresentativeResource } from './api-types';
+import { RepresentativeResource } from '../api/api-types';
 
 
 
@@ -55,7 +55,7 @@ export function RepresentativeSection({ representatives, onChange }: Representat
     onChange(newRepresentatives);
   };
 
-  const handleRepresentativeChange = (index: number, field: keyof Representative, value: any) => {
+  const handleRepresentativeChange = (index: number, field: keyof RepresentativeResource, value: any) => {
     console.log(`Updating representative at index ${index}, field: ${field}`, value);
     const newRepresentatives = [...representatives];
     newRepresentatives[index] = {

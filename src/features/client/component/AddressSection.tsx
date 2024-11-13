@@ -1,24 +1,15 @@
 import { Box, Button, Paper, Grid, IconButton, TextField, Select, MenuItem } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { AddressType, Country, State, EnumLabels } from '../shared/enums';
-import InputMask from 'react-input-mask';
-import { ValidationPatterns } from '../shared/enums';
 
-interface Address {
-  street: string | null;
-  number: string | null;
-  complement: string | null;
-  neighborhood: string | null;
-  city: string | null;
-  state: State | null;
-  country: Country;
-  zipCode: string | null;
-  addressType: AddressType;
-}
+import InputMask from 'react-input-mask';
+import { AddressType, Country, EnumLabels, State, ValidationPatterns } from '../../../components/shared/enums';
+import { AddressResource } from '../api/api-types';
+
+
 
 interface AddressSectionProps {
-  addresses: Address[];
-  onChange: (addresses: Address[]) => void;
+  addresses: AddressResource[];
+  onChange: (addresses: AddressResource[]) => void;
 }
 
 export function AddressSection({ addresses, onChange }: AddressSectionProps) {
@@ -29,7 +20,6 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
         street: null,
         number: null,
         complement: null,
-        neighborhood: null,
         city: null,
         state: null,
         country: Country.BRAZIL,
@@ -43,7 +33,7 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
     onChange(addresses.filter((_, i) => i !== index));
   };
 
-  const handleAddressChange = (index: number, field: keyof Address, value: any) => {
+  const handleAddressChange = (index: number, field: keyof AddressResource, value: any) => {
     const newAddresses = [...addresses];
     newAddresses[index] = { 
       ...newAddresses[index], 
@@ -137,15 +127,6 @@ export function AddressSection({ addresses, onChange }: AddressSectionProps) {
                 label="Complemento"
                 value={address.complement || ''}
                 onChange={(e) => handleAddressChange(index, 'complement', e.target.value)}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Bairro"
-                value={address.neighborhood || ''}
-                onChange={(e) => handleAddressChange(index, 'neighborhood', e.target.value)}
               />
             </Grid>
 

@@ -35,9 +35,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { format } from 'date-fns';
 import { toast } from 'react-toastify';
-import { PersonType } from '../../components/shared/enums';
+import { PersonType } from '../../../components/shared/enums';
 
 interface Client {
   id: string;

@@ -1,5 +1,5 @@
-import { AddressType, ContactType, Country, PersonType, RepresentativeType } from "../shared/enums";
-import { PersonalData } from "./types";
+import { AddressType, ContactType, Country, PersonType, RepresentativeType } from "../../../components/shared/enums";
+
 
 // API Resource Types
 export interface ClientResource {
@@ -69,6 +69,6 @@ export interface ClientResponse {
 
 interface Representative {
     representativeType: RepresentativeType;
-    personalData: PersonalData;
+    personalData: PersonalDataResource;
   }
   

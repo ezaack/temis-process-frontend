@@ -133,6 +133,20 @@ export const EnumLabels = {
     [State.RIO_DE_JANEIRO]: 'Rio de Janeiro',
     [State.SERGIPE]: 'Sergipe',
     [State.DISTRITO_FEDERAL]: 'Distrito Federal'
+  },
+  RepresentativeType: {
+    [RepresentativeType.PROXY]: 'Procuração',
+    [RepresentativeType.ATTOURNEY_IN_FACT]: 'Atestado em Fato',
+    [RepresentativeType.LEGAL_GUARDIAN]: 'Curador Legal',
+    [RepresentativeType.CURATOR]: 'Curador',
+    [RepresentativeType.LEGAL_REPRESENTATIVE]: 'Representante Legal',
+    [RepresentativeType.ADMINISTRATOR]: 'Administrador',
+    [RepresentativeType.MANAGER]: 'Gerente',
+    [RepresentativeType.DIRECTOR]: 'Diretor',
+    [RepresentativeType.CEO]: 'CEO',
+    [RepresentativeType.CFO]: 'CFO',
+    [RepresentativeType.PRESIDENT]: 'Presidente',
+    [RepresentativeType.BOARD_MEMBER]: 'Membro do Conselho'
   }
 } as const;
 
