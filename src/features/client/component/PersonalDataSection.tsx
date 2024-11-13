@@ -11,13 +11,11 @@ import { PersonType } from '../../../components/shared/enums';
 interface PersonalDataSectionProps {
   personalData: PersonalDataResource;
   onChange: (newPersonalData: PersonalDataResource) => void;
-  isRepresentative?: boolean;
 }
 
 export function PersonalDataSection({ 
   personalData, 
   onChange,
-  isRepresentative = false
 }: PersonalDataSectionProps) {
   const isNaturalPerson = personalData.personType === PersonType.NATURAL;
 
