@@ -6,11 +6,137 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /v0/office-group:
+    put:
+      tags:
+      - office-group-controller
+      operationId: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeGroupUpdateResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeGroupResponse"
+    post:
+      tags:
+      - office-group-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeGroupResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeGroupResponse"
+    delete:
+      tags:
+      - office-group-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
+  /v0/office-group/{groupId}/office-unit:
+    put:
+      tags:
+      - office-unit-controller
+      operationId: update_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeUnitUpdateResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeUnitResponse"
+    post:
+      tags:
+      - office-unit-controller
+      operationId: create_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeUnitResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeUnitResponse"
+    delete:
+      tags:
+      - office-unit-controller
+      operationId: delete_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
   /v0/clients:
     put:
       tags:
       - client-controller
-      operationId: update
+      operationId: update_2
       requestBody:
         content:
           application/json:
@@ -27,7 +153,7 @@ paths:
     post:
       tags:
       - client-controller
-      operationId: create
+      operationId: create_2
       requestBody:
         content:
           application/json:
@@ -44,7 +170,7 @@ paths:
     delete:
       tags:
       - client-controller
-      operationId: delete
+      operationId: delete_2
       parameters:
       - name: id
         in: query
@@ -59,11 +185,54 @@ paths:
             '*/*':
               schema:
                 type: boolean
+  /v0/office-group/{groupId}/office-unit/search:
+    post:
+      tags:
+      - office-unit-controller
+      operationId: search
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PagedFilterOfficeUnitResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOfficeUnitResponse"
+  /v0/office-group/search:
+    post:
+      tags:
+      - office-group-controller
+      operationId: search_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PagedFilterOfficeGroupResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOfficeGroupResponse"
   /v0/clients/search:
     post:
       tags:
       - client-controller
-      operationId: search
+      operationId: search_2
       requestBody:
         content:
           application/json:
@@ -77,11 +246,55 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseClientResponse"
+  /v0/office-group/{id}:
+    get:
+      tags:
+      - office-group-controller
+      operationId: fetchById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeGroupResponse"
+  /v0/office-group/{groupId}/office-unit/{id}:
+    get:
+      tags:
+      - office-unit-controller
+      operationId: fetchById_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeUnitResponse"
   /v0/clients/{id}:
     get:
       tags:
       - client-controller
-      operationId: fetchById
+      operationId: fetchById_2
       parameters:
       - name: id
         in: path
@@ -98,6 +311,138 @@ paths:
                 $ref: "#/components/schemas/ClientResponse"
 components:
   schemas:
+    OfficeGroupResource:
+      type: object
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        registrationNumber:
+          type: string
+    OfficeGroupUpdateResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        officeGroupData:
+          $ref: "#/components/schemas/OfficeGroupResource"
+    OfficeGroupResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        officeGroupData:
+          $ref: "#/components/schemas/OfficeGroupResource"
+    OfficeAddressResource:
+      type: object
+      properties:
+        street:
+          type: string
+        complement:
+          type: string
+        number:
+          type: string
+        asOf:
+          type: string
+        country:
+          type: string
+          enum:
+          - BRAZIL
+        state:
+          type: string
+          enum:
+          - AMAZONAS
+          - ALAGOAS
+          - ACRE
+          - AMAPA
+          - BAHIA
+          - PARA
+          - MATO_GROSSO
+          - MINAS_GERAIS
+          - MATO_GROSSO_DO_SUL
+          - GOIAS
+          - MARANHAO
+          - RIO_GRANDE_DO_SUL
+          - TOCANTINS
+          - PIAUI
+          - SAO_PAULO
+          - RONDONIA
+          - RORAIMA
+          - PARANA
+          - CEARA
+          - PERNAMBUCO
+          - SANTA_CATARINA
+          - PARAIBA
+          - RIO_GRANDE_DO_NORTE
+          - ESPIRITO_SANTO
+          - RIO_DE_JANEIRO
+          - SERGIPE
+          - DISTRITO_FEDERAL
+        city:
+          type: string
+        addressType:
+          type: string
+          enum:
+          - MAIL_BOX
+          - RECEPTION
+          - OFFICE_ADDRESS
+        zipCode:
+          type: string
+    OfficeContactResource:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - CELL_PHONE
+          - COMMERCIAL_EMAIL
+          - FINANCIAL_EMAIL
+          - PEOPLE_MANAGEMENT_EMAIL
+          - MARKETING_EMAIL
+          - SAILS_EMAIL
+          - COMMERCIAL_PHONE
+          - FINANCIAL_PHONE
+          - PEOPLE_MANAGEMENT_PHONE
+          - MARKETING_PHONE
+          - SAILS_PHONE
+        value:
+          type: string
+    OfficeUnitResource:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/OfficeContactResource"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/OfficeAddressResource"
+    OfficeUnitUpdateResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        officeUnitData:
+          $ref: "#/components/schemas/OfficeUnitResource"
+    OfficeUnitResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        officeUnitData:
+          $ref: "#/components/schemas/OfficeUnitResource"
     AddressResource:
       type: object
       properties:
@@ -293,6 +638,58 @@ components:
           - BOARD_MEMBER
         personalData:
           $ref: "#/components/schemas/PersonalDataResource"
+    PagedFilterOfficeUnitResource:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        example:
+          $ref: "#/components/schemas/OfficeUnitResource"
+    PagedResponseOfficeUnitResponse:
+      type: object
+      properties:
+        numberOfPages:
+          type: integer
+          format: int32
+        currentPageIndex:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int32
+    PagedFilterOfficeGroupResource:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        example:
+          $ref: "#/components/schemas/OfficeGroupResource"
+    PagedResponseOfficeGroupResponse:
+      type: object
+      properties:
+        numberOfPages:
+          type: integer
+          format: int32
+        currentPageIndex:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int32
     ClientCreateRequest:
       type: object
       properties:
@@ -336,15 +733,15 @@ components:
     PagedResponseClientResponse:
       type: object
       properties:
-        count:
-          type: integer
-          format: int64
         numberOfPages:
           type: integer
           format: int32
-        pageSize:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        count:
+          type: integer
+          format: int64
+        pageSize:
           type: integer
           format: int32
