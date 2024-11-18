@@ -18,6 +18,8 @@ import DefaultLayout from './layout/DefaultLayout';
 import { ClientForm } from './features/client/component/ClientForm';
 import { Clients } from './features/client/component/Clients';
 import { ClientDetail } from './features/client/component/ClientDetail';
+import { OfficeForm } from './features/office/component/OfficeForm';
+import { OfficeDetail } from './features/office/component/OfficeDetail';
 
 
 
@@ -147,6 +149,33 @@ function App() {
           }
         />
         <Route path="/clients/:id" element={<ClientDetail />} />
+        <Route
+          path="/office-form"
+          element={
+            <>
+              <PageTitle title="Novo Escritório" />
+              <OfficeForm />
+            </>
+          }
+        />
+        <Route
+          path="/office-form/:id"
+          element={
+            <>
+              <PageTitle title="Editar Escritório" />
+              <OfficeForm />
+            </>
+          }
+        />
+        <Route
+          path="/offices"
+          element={
+            <>
+              <PageTitle title="Detalhes do Escritório" />
+              <OfficeDetail />
+            </>
+          }
+        />
       </Routes>
       <ToastContainer />
     </DefaultLayout>
