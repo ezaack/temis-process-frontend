@@ -20,8 +20,9 @@ import { Clients } from './features/client/component/Clients';
 import { ClientDetail } from './features/client/component/ClientDetail';
 import { OfficeForm } from './features/office/component/OfficeForm';
 import { OfficeDetail } from './features/office/component/OfficeDetail';
-
-
+import { Login } from './features/auth/component/Login';
+import PrivateRoute from './components/PrivateRoute';
+import { UserProvider } from './context/UserContext';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,13 +39,15 @@ function App() {
   return loading ? (
     <Loader />
   ) : (
+    
+  <UserProvider>
     <DefaultLayout>
       <Routes>
         <Route
           index
           element={
             <>
-              <PageTitle title="Princial | Aqui você pode ver suas atividades mais importantes e alertas" />
+              <PageTitle title="Principal | Aqui você pode ver suas atividades mais importantes e alertas" />
               <MyPlace />
             </>
           }
@@ -52,82 +55,100 @@ function App() {
         <Route
           path="/clients"
           element={
-            <>
-              <PageTitle title="Clients" />
-              <Clients/>
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Clients" />
+                <Clients />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/client-form"
           element={
-            <>
-              <PageTitle title="Client Form" />
-              <ClientForm/>
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Client Form" />
+                <ClientForm />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/client-form/:id"
           element={
-            <>
-              <PageTitle title="Client Form" />
-              <ClientForm/>
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Client Form" />
+                <ClientForm />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/calendar"
           element={
-            <>
-              <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Calendar />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Calendar />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/profile"
           element={
-            <>
-              <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Profile />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Profile />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/settings"
           element={
-            <>
-              <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Settings />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Settings />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/chart"
           element={
-            <>
-              <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Chart />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Chart />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/ui/alerts"
           element={
-            <>
-              <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Alerts />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Alerts />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/ui/buttons"
           element={
-            <>
-              <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Buttons />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <Buttons />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
@@ -148,37 +169,60 @@ function App() {
             </>
           }
         />
-        <Route path="/clients/:id" element={<ClientDetail />} />
+        <Route
+          path="/clients/:id"
+          element={
+            <PrivateRoute>
+              <ClientDetail />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/office-form"
           element={
-            <>
-              <PageTitle title="Novo Escritório" />
-              <OfficeForm />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Novo Escritório" />
+                <OfficeForm />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/office-form/:id"
           element={
-            <>
-              <PageTitle title="Editar Escritório" />
-              <OfficeForm />
-            </>
+            <PrivateRoute>
+              <>
+                <PageTitle title="Editar Escritório" />
+                <OfficeForm />
+              </>
+            </PrivateRoute>
           }
         />
         <Route
           path="/offices"
           element={
-            <>
-              <PageTitle title="Detalhes do Escritório" />
+            <PrivateRoute>
+              <>
+                <PageTitle title="Detalhes do Escritório" />
+                <OfficeDetail />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/offices/:id"
+          element={
+            <PrivateRoute>
               <OfficeDetail />
-            </>
+            </PrivateRoute>
           }
         />
       </Routes>
       <ToastContainer />
     </DefaultLayout>
+    </UserProvider>
   );
 }
 

@@ -1,12 +1,33 @@
 openapi: 3.0.1
 info:
-  title: OpenAPI definition
-  version: v0
+  title: My REST API
+  description: Some custom description of API.
+  contact:
+    name: Sallo Szrajbman
+    url: salloszraj@gmail.com
+    email: www.baeldung.com
+  license:
+    name: License of API
+    url: API license URL
+  version: "1.0"
 servers:
 - url: http://localhost:8080
   description: Generated server url
+security:
+- Bearer Authentication: []
 paths:
   /v0/office-group:
+    get:
+      tags:
+      - office-group-controller
+      operationId: fetchById
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OfficeGroupResponse"
     put:
       tags:
       - office-group-controller
@@ -132,11 +153,91 @@ paths:
             '*/*':
               schema:
                 type: boolean
-  /v0/clients:
+  /v0/office-group/{groupId}/employee:
+    put:
+      tags:
+      - employee-controller
+      operationId: update_2
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+    post:
+      tags:
+      - employee-controller
+      operationId: create_2
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+    delete:
+      tags:
+      - employee-controller
+      operationId: delete_2
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
+  /v0/office-group/{groupId}/clients:
     put:
       tags:
       - client-controller
-      operationId: update_2
+      operationId: clientUpdate
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       requestBody:
         content:
           application/json:
@@ -153,7 +254,14 @@ paths:
     post:
       tags:
       - client-controller
-      operationId: create_2
+      operationId: clientCreate
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       requestBody:
         content:
           application/json:
@@ -170,8 +278,14 @@ paths:
     delete:
       tags:
       - client-controller
-      operationId: delete_2
+      operationId: clientDelete
       parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       - name: id
         in: query
         required: true
@@ -210,16 +324,23 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseOfficeUnitResponse"
-  /v0/office-group/search:
+  /v0/office-group/{groupId}/employee/search:
     post:
       tags:
-      - office-group-controller
+      - employee-controller
       operationId: search_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PagedFilterOfficeGroupResource"
+              $ref: "#/components/schemas/PagedFilterEmployeeResource"
         required: true
       responses:
         "200":
@@ -227,12 +348,19 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PagedResponseOfficeGroupResponse"
-  /v0/clients/search:
+                $ref: "#/components/schemas/PagedResponseEmployeeResponse"
+  /v0/office-group/{groupId}/clients/search:
     post:
       tags:
       - client-controller
-      operationId: search_2
+      operationId: clientSearch
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       requestBody:
         content:
           application/json:
@@ -246,11 +374,65 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseClientResponse"
+  /v0/office-group/search:
+    post:
+      tags:
+      - office-group-controller
+      operationId: search_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PagedFilterOfficeGroupResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOfficeGroupResponse"
+  /signup:
+    post:
+      tags:
+      - sign-up-controller
+      operationId: signUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpNewCostumerResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /auth/signin:
+    post:
+      tags:
+      - auth-controller
+      operationId: signIn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/JwtDto"
   /v0/office-group/{id}:
     get:
       tags:
       - office-group-controller
-      operationId: fetchById
+      operationId: fetchById_1
       parameters:
       - name: id
         in: path
@@ -269,7 +451,7 @@ paths:
     get:
       tags:
       - office-unit-controller
-      operationId: fetchById_1
+      operationId: fetchById_2
       parameters:
       - name: groupId
         in: path
@@ -290,12 +472,43 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OfficeUnitResponse"
-  /v0/clients/{id}:
+  /v0/office-group/{groupId}/employee/{id}:
+    get:
+      tags:
+      - employee-controller
+      operationId: fetchById_3
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+  /v0/office-group/{groupId}/clients/{id}:
     get:
       tags:
       - client-controller
-      operationId: fetchById_2
+      operationId: fetchClientById
       parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       - name: id
         in: path
         required: true
@@ -498,27 +711,6 @@ components:
           - OTHER
         zipCode:
           type: string
-    ClientResource:
-      type: object
-      properties:
-        description:
-          type: string
-        howDidYouHearAboutUs:
-          type: string
-        personalData:
-          $ref: "#/components/schemas/PersonalDataResource"
-    ClientUpdateRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        client:
-          $ref: "#/components/schemas/ClientResource"
-        representatives:
-          type: array
-          items:
-            $ref: "#/components/schemas/RepresentativeUpdateResource"
     ContactDataResource:
       type: object
       properties:
@@ -533,6 +725,40 @@ components:
           - PROFESSIONAL_PHONE
         value:
           type: string
+    EmployeeResource:
+      required:
+      - officeUnitIds
+      type: object
+      properties:
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+        employeeType:
+          type: string
+          enum:
+          - SECRETARY
+          - FINANCIAL_TECHNITIAN
+          - FINANCIAL_ANALIST
+          - FINANCIAL_MANAGER
+          - LAWYER_ASSISTANT
+          - LAW_ANALIST
+          - LAWYER
+          - UNIT_MANAGER
+          - GROUP_MANAGER
+        officeUnitIds:
+          maxItems: 2147483647
+          minItems: 1
+          type: array
+          items:
+            type: string
+            format: uuid
+    EmployeeUpdateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employee:
+          $ref: "#/components/schemas/EmployeeResource"
     PersonalDataResource:
       type: object
       properties:
@@ -580,6 +806,57 @@ components:
           format: date
         issuingAgency:
           type: string
+    EmployeeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employee:
+          $ref: "#/components/schemas/EmployeeResource"
+        username:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - CLIENT_ROLE
+            - CREATE_CLIENT
+            - UPDATE_CLIENT
+            - DELETE_CLIENT
+            - CREATE_UNIT
+            - UPDATE_UNIT
+            - DELEGE_UNIT
+            - UPDATE_GROUP
+            - DELETE_GROUP
+            - ALL
+    ClientResource:
+      required:
+      - officeUnitId
+      type: object
+      properties:
+        description:
+          type: string
+        howDidYouHearAboutUs:
+          type: string
+        officeUnitId:
+          type: string
+          format: uuid
+        personalData:
+          $ref: "#/components/schemas/PersonalDataResource"
+    ClientUpdateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        client:
+          $ref: "#/components/schemas/ClientResource"
+        representatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepresentativeUpdateResource"
     RepresentativeUpdateResource:
       type: object
       properties:
@@ -647,24 +924,54 @@ components:
         pageSize:
           type: integer
           format: int32
+          example: 10
         example:
           $ref: "#/components/schemas/OfficeUnitResource"
     PagedResponseOfficeUnitResponse:
       type: object
       properties:
-        numberOfPages:
-          type: integer
-          format: int32
-        currentPageIndex:
-          type: integer
-          format: int32
         count:
           type: integer
           format: int64
         pageSize:
           type: integer
           format: int32
-    PagedFilterOfficeGroupResource:
+        currentPageIndex:
+          type: integer
+          format: int32
+        numberOfPages:
+          type: integer
+          format: int32
+    EmployeeCreateRequest:
+      type: object
+      properties:
+        employee:
+          $ref: "#/components/schemas/EmployeeResource"
+        signUpData:
+          $ref: "#/components/schemas/SignUpDataResource"
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - CLIENT_ROLE
+            - CREATE_CLIENT
+            - UPDATE_CLIENT
+            - DELETE_CLIENT
+            - CREATE_UNIT
+            - UPDATE_UNIT
+            - DELEGE_UNIT
+            - UPDATE_GROUP
+            - DELETE_GROUP
+            - ALL
+    SignUpDataResource:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    PagedFilterEmployeeResource:
       type: object
       properties:
         pageIndex:
@@ -673,21 +980,22 @@ components:
         pageSize:
           type: integer
           format: int32
+          example: 10
         example:
-          $ref: "#/components/schemas/OfficeGroupResource"
-    PagedResponseOfficeGroupResponse:
+          $ref: "#/components/schemas/EmployeeResource"
+    PagedResponseEmployeeResponse:
       type: object
       properties:
-        numberOfPages:
+        count:
+          type: integer
+          format: int64
+        pageSize:
           type: integer
           format: int32
         currentPageIndex:
           type: integer
           format: int32
-        count:
-          type: integer
-          format: int64
-        pageSize:
+        numberOfPages:
           type: integer
           format: int32
     ClientCreateRequest:
@@ -728,20 +1036,109 @@ components:
         pageSize:
           type: integer
           format: int32
+          example: 10
         example:
           $ref: "#/components/schemas/ClientResource"
     PagedResponseClientResponse:
       type: object
       properties:
-        numberOfPages:
-          type: integer
-          format: int32
-        currentPageIndex:
-          type: integer
-          format: int32
         count:
           type: integer
           format: int64
         pageSize:
           type: integer
           format: int32
+        currentPageIndex:
+          type: integer
+          format: int32
+        numberOfPages:
+          type: integer
+          format: int32
+    PagedFilterOfficeGroupResource:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+          example: 10
+        example:
+          $ref: "#/components/schemas/OfficeGroupResource"
+    PagedResponseOfficeGroupResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int32
+        currentPageIndex:
+          type: integer
+          format: int32
+        numberOfPages:
+          type: integer
+          format: int32
+    SignUpNewCostumerResource:
+      type: object
+      properties:
+        customerData:
+          $ref: "#/components/schemas/PersonalDataResource"
+        signUpData:
+          $ref: "#/components/schemas/SignUpDataResource"
+        officeGroupData:
+          $ref: "#/components/schemas/OfficeGroupResource"
+        groupMatrixUnitData:
+          $ref: "#/components/schemas/OfficeUnitResource"
+    SignInDto:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    JwtDto:
+      type: object
+      properties:
+        userData:
+          $ref: "#/components/schemas/UserData"
+        accessToken:
+          type: string
+    UserData:
+      type: object
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        officeGroupId:
+          type: string
+          format: uuid
+        officeUnitIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        fullName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - CLIENT_ROLE
+            - CREATE_CLIENT
+            - UPDATE_CLIENT
+            - DELETE_CLIENT
+            - CREATE_UNIT
+            - UPDATE_UNIT
+            - DELEGE_UNIT
+            - UPDATE_GROUP
+            - DELETE_GROUP
+            - ALL
+  securitySchemes:
+    Bearer Authentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
