@@ -12,6 +12,7 @@ import {
 import { Alert } from '@mui/material';
 import { useUserContext } from '../../../context/UserContext';
 import { authService } from '../api/authService';
+import { Link } from 'react-router-dom';
 
 export function Login() {
   const navigate = useNavigate();
@@ -86,6 +87,14 @@ export function Login() {
             </Grid>
           </Grid>
         </form>
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography variant="body2">
+            Don't have an account?{' '}
+            <Link to="/auth/signup" className="text-primary">
+              Sign Up
+            </Link>
+          </Typography>
+        </Box>
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
           <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
             {error}

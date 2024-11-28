@@ -1,14 +1,22 @@
 import React, { createContext, useContext, useState } from 'react';
 
+interface User {
+  accessToken: string;
+  userData: {
+    officeGroupId: string;
+    // Add other user data fields as necessary
+  };
+}
+
 interface UserContextType {
-  user: any; // Define a proper type based on your user data structure
-  setUser: (user: any) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>(null); // Initialize user state
+  const [user, setUser] = useState<User | null>(null); // Initialize user state
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

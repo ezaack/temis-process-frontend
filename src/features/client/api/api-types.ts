@@ -9,14 +9,14 @@ export interface ClientResource {
 }
 
 export interface PersonalDataResource {
-  name: string | null;
-  namePart2: string | null;
-  displayName: string | null;
-  birthDate: string | null;
-  personType: PersonType;
-  contacts: ContactResource[];
-  addresses: AddressResource[];
-  personalDocuments: PersonalDocumentResource[];
+  name?: string | null;
+  namePart2?: string | null;
+  displayName?: string | null;
+  birthDate?: string | null;
+  personType?: PersonType | null;
+  contacts?: ContactResource[] | null;
+  addresses?: AddressResource[] | null;
+  personalDocuments?: PersonalDocumentResource[] | null;
 }
 
 export interface ContactResource {
@@ -72,3 +72,10 @@ interface Representative {
     personalData: PersonalDataResource;
   }
   
+export interface ClientFilter {
+  pageIndex: number,
+  pageSize: number,
+  example: {
+    personalData:PersonalDataResource
+  }
+}

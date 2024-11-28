@@ -46,10 +46,12 @@ function App() {
         <Route
           index
           element={
-            <>
+            <PrivateRoute>
+              <>
               <PageTitle title="Principal | Aqui você pode ver suas atividades mais importantes e alertas" />
               <MyPlace />
             </>
+            </PrivateRoute>
           }
         />
         <Route

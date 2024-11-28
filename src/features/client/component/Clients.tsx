@@ -37,6 +37,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { PersonType } from '../../../components/shared/enums';
+import { useUserContext } from '../../../context/UserContext';
+import { loggedInUser } from '../../auth/api/authService';
+import { clientService } from '../api/clientService';
 
 interface Client {
   id: string;
@@ -86,8 +89,14 @@ export function Clients() {
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
 
   const fetchClients = async () => {
+    do{
+      if(!loggedInUser){
+        console.log('skip call!!')
+        continue;
+      }
+      console.log(loggedInUser);
     try {
-      const response = await axios.post<PagedResponse>('http://localhost:8080/v0/clients/search', {
+      const response:any = await clientService.search({
         pageIndex: page,
         pageSize: rowsPerPage,
         example: {
@@ -99,16 +108,18 @@ export function Clients() {
             }] : undefined
           }
         }
-      });
+      }
+    );
       
-      setClients(response.data.content || []);
-      setTotalCount(response.data.count || 0);
+      setClients(response.content || []);
+      setTotalCount(response.count || 0);
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast.error('Erro ao carregar clientes');
     } finally {
       setLoading(false);
     }
+  }while(!loggedInUser);
   };
 
   useEffect(() => {

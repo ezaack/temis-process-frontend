@@ -21,9 +21,9 @@ export enum OfficeContactType {
 
 // Office Group Types
 export interface OfficeGroupResource {
-  name: string;
-  displayName: string;
-  registrationNumber: string;
+  name: string | null;
+  displayName: string | null;
+  registrationNumber: string | null;
 }
 
 export interface OfficeGroupUpdateResource {
@@ -55,8 +55,8 @@ export interface OfficeContactResource {
 }
 
 export interface OfficeUnitResource {
-  name: string;
-  registrationNumber: string;
+  name: string | null;
+  registrationNumber: string | null;
   contacts: OfficeContactResource[];
   addresses: OfficeAddressResource[];
 }
