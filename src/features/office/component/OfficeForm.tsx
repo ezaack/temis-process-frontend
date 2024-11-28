@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 
 import { OfficeGroupResource, OfficeUnitResource } from '../api/api-types';
 import { OfficeGroupSection } from './OfficeGroupSection';
-import { OfficeUnitSection } from './OfficeUnitSection';
+import OfficeUnitSection from './OfficeUnitSection';
 
 export function OfficeForm() {
   const navigate = useNavigate();

@@ -13,13 +13,15 @@ import {
 import { SignUpData } from '../../features/auth/api/api-types';
 import { PersonalDataSection } from '../../features/client/component/PersonalDataSection';
 import { OfficeGroupSection } from '../../features/office/component/OfficeGroupSection';
-import { OfficeUnitSection } from '../../features/office/component/OfficeUnitSection';
 import { authService } from '../../features/auth/api/authService';
 import { toast } from 'react-toastify';
+import OfficeUnitSection from '../../features/office/component/OfficeUnitSection';
+import { ContactType, PersonType } from '../../components/shared/enums';
 
 const SignUp: React.FC = () => {
 
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<SignUpData>({
     customerData: {
@@ -27,8 +29,14 @@ const SignUp: React.FC = () => {
       namePart2: '',
       displayName: '',
       birthDate: null,
-      personType: undefined,
-      contacts: [],
+      personType: PersonType.NATURAL,
+      contacts: [
+        {
+          type: ContactType.WORK_EMAIL,
+          value:  null,
+          mandatory: true
+        }
+      ],
       addresses: [],
       personalDocuments: []
     },
@@ -52,6 +60,7 @@ const SignUp: React.FC = () => {
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Validate the form data
@@ -97,13 +106,15 @@ const SignUp: React.FC = () => {
     } catch (err) {
       setError('Signup failed. Please try again.'); // Set an error message if signup fails
       console.error('Signup error:', err); // Log the error for debugging
+    } finally{
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Paper elevation={1} sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Sign Up
+        Cadastro
       </Typography>
       {error && <Typography color="error">{error}</Typography>}
       <form onSubmit={handleSubmit}>
@@ -116,21 +127,7 @@ const SignUp: React.FC = () => {
                 customerData: newPersonalData
               })}
             />
-            <OfficeGroupSection
-              officeGroupData={formData.officeGroupData}
-              onChange={(newData) => setFormData({
-                ...formData,
-                officeGroupData: newData
-              })}
-            />
-            <OfficeUnitSection
-              officeUnits={formData.groupMatrixUnitData}
-              onChange={(newUnits) => setFormData({
-                ...formData,
-                groupMatrixUnitData: newUnits[0]
-              })}
-            />
-            <Grid item xs={12}>
+                        <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Login"
@@ -163,17 +160,37 @@ const SignUp: React.FC = () => {
                 required
               />
             </Grid>
+             <Typography variant="h6" gutterBottom>
+              Dados do Escritório
+            </Typography>
+            <OfficeGroupSection
+              officeGroupData={formData.officeGroupData}
+              onChange={(newData) => setFormData({
+                ...formData,
+                officeGroupData: newData
+              })}
+            />
+            <OfficeUnitSection
+              officeUnits={[formData.groupMatrixUnitData]}
+              onChange={(newUnits) => setFormData({
+                ...formData,
+                groupMatrixUnitData: newUnits[0]
+              })}
+            />
+            <Box sx={{ mt: 2 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                type="submit"
+                size="large"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Salvando...' : 'Enviar'}
+              </Button>
+            </Box>
           </Stack>
         </Box>
       </form>
-      <Box sx={{ mt: 2, textAlign: 'center' }}>
-        <Typography variant="body2">
-          Already have an account?{' '}
-          <Link to="/auth/signin" className="text-primary">
-            Sign in
-          </Link>
-        </Typography>
-      </Box>
     </Paper>
   );
 };

@@ -3,15 +3,13 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InputMask from 'react-input-mask';
 import { ContactType, EnumLabels, ContactPatterns, ValidationPatterns } from '../../../components/shared/enums';
+import { ContactResource } from '../api/api-types';
+import { Label } from '@mui/icons-material';
 
-interface Contact {
-  type: ContactType;
-  value: string | null;
-}
 
 interface ContactSectionProps {
-  contacts: Contact[];
-  onChange: (contacts: Contact[]) => void;
+  contacts: ContactResource[];
+  onChange: (contacts: ContactResource[]) => void;
 }
 
 export function ContactSection({ contacts, onChange }: ContactSectionProps) {
@@ -26,7 +24,7 @@ export function ContactSection({ contacts, onChange }: ContactSectionProps) {
     onChange(contacts.filter((_, i) => i !== index));
   };
 
-  const handleContactChange = (index: number, field: keyof Contact, value: any) => {
+  const handleContactChange = (index: number, field: keyof ContactResource, value: any) => {
     const newContacts = [...contacts];
     newContacts[index] = { ...newContacts[index], [field]: value };
     onChange(newContacts);
@@ -60,7 +58,16 @@ export function ContactSection({ contacts, onChange }: ContactSectionProps) {
 
       {contacts.map((contact, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Select
+          {
+          contact.mandatory?
+          (
+            <TextField
+            disabled
+            value={EnumLabels.ContactType[contact.type] }
+            sx={{ minWidth: 200 }}
+          />
+          ):
+          (<Select
             value={contact.type}
             onChange={(e) => handleContactChange(index, 'type', e.target.value)}
             sx={{ minWidth: 200 }}
@@ -70,10 +77,12 @@ export function ContactSection({ contacts, onChange }: ContactSectionProps) {
                 {EnumLabels.ContactType[type]}
               </MenuItem>
             ))}
-          </Select>
+          </Select>)
+          }
 
           {ContactPatterns[contact.type] === 'email' ? (
             <TextField
+              required
               fullWidth
               type="email"
               value={contact.value || ''}
@@ -96,12 +105,20 @@ export function ContactSection({ contacts, onChange }: ContactSectionProps) {
             </InputMask>
           )}
 
-          <IconButton 
+          {contact.mandatory?
+          (<IconButton 
+            color="error"
+            disabled
+          >
+            <DeleteIcon />
+          </IconButton>):
+          (<IconButton 
             color="error"
             onClick={() => handleRemoveContact(index)}
           >
             <DeleteIcon />
-          </IconButton>
+          </IconButton>)
+}
         </Box>
       ))}
     </Box>

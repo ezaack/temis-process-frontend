@@ -19,7 +19,8 @@ const OfficeUnitSection: React.FC<OfficeUnitSectionProps> = ({ officeUnits = [],
           <Grid item xs={6}>
             <TextField
               fullWidth
-              label="Unit Name"
+              required
+              label="Nome/Descrição do escritório"
               variant="outlined"
               value={unit.name}
               onChange={(e) => {
@@ -32,7 +33,7 @@ const OfficeUnitSection: React.FC<OfficeUnitSectionProps> = ({ officeUnits = [],
           <Grid item xs={6}>
             <TextField
               fullWidth
-              label="Registration Number"
+              label="Número de registro do escritório"
               variant="outlined"
               value={unit.registrationNumber}
               onChange={(e) => {

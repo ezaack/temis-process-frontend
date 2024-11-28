@@ -22,6 +22,7 @@ export interface PersonalDataResource {
 export interface ContactResource {
   type: ContactType;
   value: string | null;
+  mandatory?: boolean;
 }
 
 export interface AddressResource {
