@@ -18,7 +18,8 @@ import { toast } from 'react-toastify';
 import OfficeUnitSection from '../../features/office/component/OfficeUnitSection';
 import { ContactType, PersonType } from '../../components/shared/enums';
 
-const SignUp: React.FC = () => {
+
+export function SignUp() {
 
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,12 +61,15 @@ const SignUp: React.FC = () => {
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    setIsSubmitting(true)
+    console.log(' #### handler SignUp submit');
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Validate the form data
-    if (!formData.signUpData.login || !formData.signUpData.password || !formData.customerData.name) {
-      setError('All fields are required.'); // Set an error message if validation fails
+    if (!formData.signUpData.login || 
+      !formData.signUpData.password || 
+      !formData.customerData.name) {
+      setError('All fields marked with (*) are required'); // Set an error message if validation fails
       return;
     }
 
@@ -98,15 +102,18 @@ const SignUp: React.FC = () => {
           password: formData.signUpData.password,
         },
       };
-
       // Call the signup service
+      
+      console.log(' #### submiting the SignUp data');
       await authService.signUp(signUpData);
       toast.success('Sign up successful! Redirecting to login...'); // Show success message
-      navigate('/auth/signin'); // Redirect to the login page after successful signup
+      navigate('/signin'); // Redirect to the login page after successful signup
     } catch (err) {
       setError('Signup failed. Please try again.'); // Set an error message if signup fails
       console.error('Signup error:', err); // Log the error for debugging
     } finally{
+      
+      console.log(' #### SignUp finished');
       setIsSubmitting(false);
     }
   };

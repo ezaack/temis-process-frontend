@@ -27,7 +27,7 @@ export function Login() {
     try {
       const userData = await authService.login({ login, password });
       setUser(userData); // Store user data in context
-      navigate('/dashboard'); // Redirect to dashboard or home page
+      navigate('/'); // Redirect to dashboard or home page
     } catch (err) {
       setError('Login failed. Please check your credentials.');
       setOpenSnackbar(true);
@@ -89,9 +89,9 @@ export function Login() {
         </form>
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Typography variant="body2">
-            Don't have an account?{' '}
+            Não possui uma conta?{' '}
             <Link to="/auth/signup" className="text-primary">
-              Sign Up
+              Clique aqui para criar uma!
             </Link>
           </Typography>
         </Box>

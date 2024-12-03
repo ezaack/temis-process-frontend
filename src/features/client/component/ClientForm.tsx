@@ -16,6 +16,8 @@ import { PersonalDataSection } from './PersonalDataSection';
 import { clientService } from '../api/clientService';
 import { AddressResource, ContactResource, PersonalDocumentResource, RepresentativeResource } from '../api/api-types';
 import { RepresentativeSection } from './RepresentativeSection';
+import { OfficeUnitResource } from '../../office/api/api-types';
+import { loggedInUser } from '../../auth/api/authService';
 
 
 
@@ -57,6 +59,13 @@ export function ClientForm() {
   const [selectedPersonType, setSelectedPersonType] = useState<PersonType>(PersonType.NATURAL);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const officeUnits: [] = ()=>{
+    if(loggedInUser
+      && loggedInUser.userData.officeUnitIds.length > 1){
+        return [{officeUnitId: loggedInUser.userData.officeUnitIds.at(0)}];
+    }
+    return [];
+  }
 
   useEffect(() => {
     const fetchClient = async () => {

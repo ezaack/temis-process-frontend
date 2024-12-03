@@ -28,6 +28,7 @@ import {
   OfficeAddressType,
   BrazilianState 
 } from '../api/api-types';
+import { loggedInUser } from '../../auth/api/authService';
 
 // Enum labels for better presentation
 const ContactTypeLabels: Record<OfficeContactType, string> = {
@@ -58,15 +59,20 @@ export function OfficeDetail() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if(!loggedInUser){
+        console.error('No logged in user information found')
+        return;
+      }
       try {
-        const groupResponse = await officeService.fetchMyGroup();
-        setOfficeGroup(groupResponse);
-
-        const unitsResponse = await officeService.searchUnits(groupResponse.id, {
+        const officeGroupResponse = await officeService.fetchGroupById(loggedInUser?.userData.officeGroupId);
+        console.log("#### Office group: ", officeGroupResponse);
+        setOfficeGroup(officeGroupResponse);
+        const unitsResponse = await officeService.searchUnits(loggedInUser?.userData.officeGroupId, {
           pageIndex: 0,
           pageSize: 100,
           example: {} as any
         });
+        console.log("#### Office units: ", officeGroupResponse);
         setOfficeUnits(unitsResponse.content || []);
       } catch (error) {
         console.error('Error fetching office data:', error);
