@@ -9,7 +9,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   InputLabel,
-  Stack} from '@mui/material';
+  Stack,
+  Select,
+  MenuItem} from '@mui/material';
 import { EnumLabels, PersonType } from '../../../components/shared/enums';
 import { toast } from 'react-toastify';
 import { PersonalDataSection } from './PersonalDataSection';
@@ -29,6 +31,7 @@ export function ClientForm() {
   const [formData, setFormData] = useState<{
     description: string | null;
     howDidYouHearAboutUs: string | null;
+    officeUnitId: string | undefined;
     personalData: {
       name: string | null;
       namePart2: string | null;
@@ -43,6 +46,7 @@ export function ClientForm() {
   }>({
     description: null,
     howDidYouHearAboutUs: null,
+    officeUnitId: loggedInUser?.userData.officeUnits.at(0)?.officeUnitId,
     personalData: {
       name: null,
       namePart2: null,
@@ -59,13 +63,6 @@ export function ClientForm() {
   const [selectedPersonType, setSelectedPersonType] = useState<PersonType>(PersonType.NATURAL);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const officeUnits: [] = ()=>{
-    if(loggedInUser
-      && loggedInUser.userData.officeUnitIds.length > 1){
-        return [{officeUnitId: loggedInUser.userData.officeUnitIds.at(0)}];
-    }
-    return [];
-  }
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -114,6 +111,7 @@ export function ClientForm() {
         client: {
           description: formData.description,
           howDidYouHearAboutUs: formData.howDidYouHearAboutUs,
+          officeUnitId:formData.officeUnitId,
           personalData: {
             name: formData.personalData.name,
             namePart2: formData.personalData.namePart2,
@@ -185,6 +183,22 @@ export function ClientForm() {
               value={formData.howDidYouHearAboutUs ?? ''}
               onChange={(e) => setFormData({...formData, howDidYouHearAboutUs: e.target.value})}
             />
+            <Box>
+            <InputLabel sx={{ mb: 1 }}>Escritório</InputLabel>
+            <Select
+              fullWidth
+              value={formData.howDidYouHearAboutUs ?? ''}
+              onChange={(e) => setFormData({...formData, officeUnitId: e.target.value})}
+            
+            >
+              {Object.values(loggedInUser?loggedInUser.userData.officeUnits:[]).map((unit) => (
+                <MenuItem key={unit.officeUnitId} value={unit.officeUnitId}>
+                  {unit.officeUnitName}
+                </MenuItem>
+              ))}
+              </Select>
+
+            </Box>
 
             <Box>
               <InputLabel sx={{ mb: 1 }}>Tipo de Pessoa</InputLabel>

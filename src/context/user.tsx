@@ -3,7 +3,12 @@ export interface UserData{
     officeGroupId: string,
     officeUnitIds: [],
     fullName: string,
-    roles: []
+    roles: [],
+    officeUnits:UserOfficeUnitData[]
+  }
+  export interface UserOfficeUnitData{
+    officeUnitId: string,
+    officeUnitName: string
   }
 
   export interface User{

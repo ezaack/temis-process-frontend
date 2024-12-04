@@ -31,58 +31,23 @@ import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { PersonType, EnumLabels, ContactType, RepresentativeType } from '../../../components/shared/enums';
-import { PersonalDataResource } from '../api/api-types';
-
-interface ClientDetailProps {
-  id: string;
-  client: {
-    description: string;
-    howDidYouHearAboutUs: string;
-    personalData: {
-      name: string;
-      namePart2: string;
-      displayName: string;
-      birthDate: string;
-      personType: PersonType;
-      contacts: Array<{
-        type: ContactType;
-        value: string;
-      }>;
-      addresses: Array<{
-        street: string;
-        number: string;
-        complement: string;
-        city: string;
-        state: string;
-        country: string;
-        zipCode: string;
-        addressType: string;
-      }>;
-      personalDocuments: Array<{
-        type: string;
-        value: string;
-        issuingDate: string;
-        issuingAgency: string;
-      }>;
-      representatives: Array<{
-        representativeType: RepresentativeType;
-        personalData: PersonalDataResource;
-      }>;
-    };
-  };
-}
+import { ClientResponse, PersonalDataResource } from '../api/api-types';
+import { clientService } from '../api/clientService';
 
 export function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [clientData, setClientData] = useState<ClientDetailProps | null>(null);
+  const [clientData, setClientData] = useState<ClientResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchClientDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/v0/clients/${id}`);
-        setClientData(response.data);
+        if(id)
+        {
+          const response = await clientService.fetchById(id);
+          setClientData(response);
+      }
       } catch (error) {
         console.error('Error fetching client details:', error);
         toast.error('Erro ao carregar detalhes do cliente');
@@ -97,11 +62,11 @@ export function ClientDetail() {
   }, [id]);
 
   if (loading) {
-    return <Box>Loading...</Box>; // You could add a nice loading skeleton here
+    return <Box>Carregando...</Box>; // You could add a nice loading skeleton here
   }
 
   if (!clientData) {
-    return <Box>Client not found</Box>;
+    return <Box>Cliente não encontrado</Box>;
   }
 
   const { client } = clientData;
