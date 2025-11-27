@@ -91,7 +91,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Calendar |  - Tailwind CSS Admin Dashboard Template" />
                 <Calendar />
               </>
             </PrivateRoute>
@@ -102,7 +102,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Profile |  - Tailwind CSS Admin Dashboard Template" />
                 <Profile />
               </>
             </PrivateRoute>
@@ -113,7 +113,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Settings |  - Tailwind CSS Admin Dashboard Template" />
                 <Settings />
               </>
             </PrivateRoute>
@@ -124,7 +124,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Basic Chart |  - Tailwind CSS Admin Dashboard Template" />
                 <Chart />
               </>
             </PrivateRoute>
@@ -135,7 +135,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Alerts |  - Tailwind CSS Admin Dashboard Template" />
                 <Alerts />
               </>
             </PrivateRoute>
@@ -146,7 +146,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Buttons |  - Tailwind CSS Admin Dashboard Template" />
                 <Buttons />
               </>
             </PrivateRoute>
@@ -156,7 +156,7 @@ function App() {
           path="/auth/signin"
           element={
             <>
-              <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <PageTitle title="Signin |  - Tailwind CSS Admin Dashboard Template" />
               <Login />
             </>
           }
@@ -165,7 +165,7 @@ function App() {
           path="/auth/signup"
           element={
             <>
-              <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <PageTitle title="Signup |  - Tailwind CSS Admin Dashboard Template" />
               <SignUp />
             </>
           }

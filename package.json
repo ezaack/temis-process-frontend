@@ -1,17 +1,17 @@
 {
-  "name": "tailadmin-react-free",
+  "name": "temis",
   "private": true,
   "version": "1.3.8",
   "type": "module",
   "scripts": {
+    "start": "vite -- --host 0.0.0.0",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "author": {
-    "name": "TailAdmin",
-    "email": "hello@tailadmin.com",
-    "url": "https://tailadmin.com"
+    "name": "Diego Mota",
+    "email": "drm2608@gmail.com"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
