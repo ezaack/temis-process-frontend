@@ -6,7 +6,7 @@ import type {
 } from './api-types';
 import { loggedInUser } from '../../auth/api/authService';
 
-const API_URL = 'http://termis-process-service-6klewh6jvq-lz.a.run.app/v0';
+const API_URL = 'https://termis-process-service-6klewh6jvq-lz.a.run.app/v0';
 
 export const clientService = {
   create: async (data: ClientCreateRequest): Promise<ClientResponse> => {

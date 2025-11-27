@@ -11,7 +11,7 @@ info:
     url: API license URL
   version: "1.0"
 servers:
-- url: http://termis-process-service-6klewh6jvq-lz.a.run.app
+- url: https://termis-process-service-6klewh6jvq-lz.a.run.app
   description: Generated server url
 security:
 - Bearer Authentication: []

@@ -134,7 +134,7 @@ export function Clients() {
   const handleDeleteConfirm = async () => {
     if (clientToDelete) {
       try {
-        await axios.delete(`http://termis-process-service-6klewh6jvq-lz.a.run.app/v0/clients?id=${clientToDelete}`);
+        await axios.delete(`https://termis-process-service-6klewh6jvq-lz.a.run.app/v0/clients?id=${clientToDelete}`);
         toast.success('Cliente excluído com sucesso');
         fetchClients();
       } catch (error) {

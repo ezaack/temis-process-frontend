@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { User, UserData } from '../../../context/user';
 
-const API_URL = 'http://termis-process-service-6klewh6jvq-lz.a.run.app/v0/auth'; // Adjust the URL as needed
+const API_URL = 'https://termis-process-service-6klewh6jvq-lz.a.run.app/v0/auth'; // Adjust the URL as needed
 
 export var loggedInUser: User | null = null;
 
