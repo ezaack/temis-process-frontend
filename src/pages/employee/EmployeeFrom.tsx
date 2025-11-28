@@ -10,22 +10,20 @@ import {
   Grid,
 } from '@mui/material';
 
-import { SignUpData } from '../../features/auth/api/api-types';
 import { PersonalDataSection } from '../../features/client/component/PersonalDataSection';
-import { OfficeGroupSection } from '../../features/office/component/OfficeGroupSection';
-import { authService } from '../../features/auth/api/authService';
 import { toast } from 'react-toastify';
-import OfficeUnitSection from '../../features/office/component/OfficeUnitSection';
 import { ContactType, PersonType } from '../../components/shared/enums';
+import { Employee } from '../../features/employee/api/api-types';
+import { employeeService } from '../../features/employee/api/employee-service';
 
 
-export function SignUp() {
+export function EmployeeForm() {
 
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState<SignUpData>({
-    customerData: {
+  const [formData, setFormData] = useState<Employee>({
+    personalData: {
       name: '',
       namePart2: '',
       displayName: '',
@@ -41,21 +39,13 @@ export function SignUp() {
       addresses: [],
       personalDocuments: []
     },
-    officeGroupData: {
-      name: '',
-      displayName: '',
-      registrationNumber: '',
-    },
-    groupMatrixUnitData: {
-      name: '',
-      registrationNumber: '',
-      contacts: [],
-      addresses: []
-    },
+    employeeType: "",
+    officeUnitIds: [],
     signUpData: {
       login: '',
       password: ''
-    }
+    },
+    roles: []
   });
 
   const [error, setError] = useState('');
@@ -68,52 +58,40 @@ export function SignUp() {
     // Validate the form data
     if (!formData.signUpData.login || 
       !formData.signUpData.password || 
-      !formData.customerData.name) {
+      !formData.personalData.name) {
       setError('All fields marked with (*) are required'); // Set an error message if validation fails
       return;
     }
 
     try {
-      // Prepare the sign-up data
       const signUpData = {
-        customerData: {
-          name: formData.customerData.name,
-          namePart2: formData.customerData.namePart2,
-          displayName: formData.customerData.displayName,
-          birthDate: formData.customerData.birthDate,
-          personType: formData.customerData.personType,
-          contacts: formData.customerData.contacts,
-          addresses: formData.customerData.addresses,
-          personalDocuments: formData.customerData.personalDocuments,
+        personalData: {
+          name: formData.personalData.name,
+          namePart2: formData.personalData.namePart2,
+          displayName: formData.personalData.displayName,
+          birthDate: formData.personalData.birthDate,
+          personType: formData.personalData.personType,
+          contacts: formData.personalData.contacts,
+          addresses: formData.personalData.addresses,
+          personalDocuments: formData.personalData.personalDocuments,
         },
-        officeGroupData: {
-          name: formData.officeGroupData.name,
-          displayName: formData.officeGroupData.displayName,
-          registrationNumber: formData.officeGroupData.registrationNumber,
-        },
-        groupMatrixUnitData: {
-          name: formData.groupMatrixUnitData.name,
-          registrationNumber: formData.groupMatrixUnitData.registrationNumber,
-          contacts: formData.groupMatrixUnitData.contacts,
-          addresses: formData.groupMatrixUnitData.addresses,
-        },
+        employeeType: formData.employeeType,
+        officeUnitIds: formData.officeUnitIds,
         signUpData: {
           login: formData.signUpData.login,
           password: formData.signUpData.password,
         },
+        roles: formData.roles
       };
       // Call the signup service
       
-      console.log(' #### submiting the SignUp data');
-      await authService.signUp(signUpData);
-      toast.success('Sign up successful! Redirecting to login...'); // Show success message
-      navigate('/'); // Redirect to the login page after successful signup
+      console.log(' #### submiting the employee data');
+      await employeeService.post(signUpData);
+      toast.success('Colaborador inserido'); // Show success message
+      navigate('/employees'); // Redirect to the login page after successful signup
     } catch (err) {
-      setError('Signup failed. Please try again.'); // Set an error message if signup fails
       console.error('Signup error:', err); // Log the error for debugging
     } finally{
-      
-      console.log(' #### SignUp finished');
       setIsSubmitting(false);
     }
   };
@@ -128,10 +106,10 @@ export function SignUp() {
         <Box sx={{ mt: 2 }}>
           <Stack spacing={3}>
             <PersonalDataSection
-              personalData={formData.customerData}
+              personalData={formData.personalData}
               onChange={(newPersonalData) => setFormData({
                 ...formData,
-                customerData: newPersonalData
+                personalData: newPersonalData
               })}
             />
                         <Grid item xs={12}>
@@ -170,20 +148,6 @@ export function SignUp() {
              <Typography variant="h6" gutterBottom>
               Dados do Escritório
             </Typography>
-            <OfficeGroupSection
-              officeGroupData={formData.officeGroupData}
-              onChange={(newData) => setFormData({
-                ...formData,
-                officeGroupData: newData
-              })}
-            />
-            <OfficeUnitSection
-              officeUnits={[formData.groupMatrixUnitData]}
-              onChange={(newUnits) => setFormData({
-                ...formData,
-                groupMatrixUnitData: newUnits[0]
-              })}
-            />
             <Box sx={{ mt: 2 }}>
               <Button
                 fullWidth
@@ -202,4 +166,4 @@ export function SignUp() {
   );
 };
 
-export default SignUp;
+export default EmployeeForm;

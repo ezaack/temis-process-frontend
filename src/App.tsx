@@ -22,6 +22,7 @@ import { OfficeDetail } from './features/office/component/OfficeDetail';
 import { Login } from './features/auth/component/Login';
 import PrivateRoute from './components/PrivateRoute';
 import { UserProvider } from './context/UserContext';
+import EmployeeForm from './pages/employee/EmployeeFrom';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -217,6 +218,14 @@ function App() {
           element={
             <PrivateRoute>
               <OfficeDetail />
+            </PrivateRoute>
+          }
+        />
+                <Route
+          path="/employee-form"
+          element={
+            <PrivateRoute>
+              <EmployeeForm />
             </PrivateRoute>
           }
         />
