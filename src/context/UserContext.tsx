@@ -4,6 +4,7 @@ interface User {
   accessToken: string;
   userData: {
     officeGroupId: string;
+    fullName: string;
     // Add other user data fields as necessary
   };
 }
