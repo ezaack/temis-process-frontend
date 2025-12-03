@@ -56,7 +56,7 @@ export function EmployeeForm() {
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Validate the form data
-    if (!formData.signUpData.login || 
+    if (!formData.personalData.contacts?.find(c => c.type === ContactType.WORK_EMAIL)?.value || 
       !formData.signUpData.password || 
       !formData.personalData.name) {
       setError('All fields marked with (*) are required'); // Set an error message if validation fails
@@ -65,20 +65,22 @@ export function EmployeeForm() {
 
     try {
       const signUpData = {
-        personalData: {
-          name: formData.personalData.name,
-          namePart2: formData.personalData.namePart2,
-          displayName: formData.personalData.displayName,
-          birthDate: formData.personalData.birthDate,
-          personType: formData.personalData.personType,
-          contacts: formData.personalData.contacts,
-          addresses: formData.personalData.addresses,
-          personalDocuments: formData.personalData.personalDocuments,
+        "employee": {
+          personalData: {
+            name: formData.personalData.name,
+            namePart2: formData.personalData.namePart2,
+            displayName: formData.personalData.displayName,
+            birthDate: formData.personalData.birthDate,
+            personType: formData.personalData.personType,
+            contacts: formData.personalData.contacts,
+            addresses: formData.personalData.addresses,
+            personalDocuments: formData.personalData.personalDocuments,
+          },
+          employeeType: formData.employeeType,
+          officeUnitIds: formData.officeUnitIds,
         },
-        employeeType: formData.employeeType,
-        officeUnitIds: formData.officeUnitIds,
         signUpData: {
-          login: formData.signUpData.login,
+          login: formData.personalData.contacts?.find(c => c.type === ContactType.WORK_EMAIL)?.value || formData.signUpData.login,
           password: formData.signUpData.password,
         },
         roles: formData.roles
@@ -99,7 +101,7 @@ export function EmployeeForm() {
   return (
     <Paper elevation={1} sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Cadastro
+        Cadastro de colaborador
       </Typography>
       {error && <Typography color="error">{error}</Typography>}
       <form onSubmit={handleSubmit}>
@@ -111,23 +113,8 @@ export function EmployeeForm() {
                 ...formData,
                 personalData: newPersonalData
               })}
+              simplyfied={true}
             />
-                        <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Login"
-                variant="outlined"
-                value={formData.signUpData.login}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  signUpData: {
-                    ...formData.signUpData,
-                    login: e.target.value
-                  }
-                })}
-                required
-              />
-            </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -145,9 +132,6 @@ export function EmployeeForm() {
                 required
               />
             </Grid>
-             <Typography variant="h6" gutterBottom>
-              Dados do Escritório
-            </Typography>
             <Box sx={{ mt: 2 }}>
               <Button
                 fullWidth

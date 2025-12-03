@@ -11,11 +11,13 @@ import { PersonType } from '../../../components/shared/enums';
 interface PersonalDataSectionProps {
   personalData: PersonalDataResource;
   onChange: (newPersonalData: PersonalDataResource) => void;
+  simplyfied?: boolean | null;
 }
 
 export function PersonalDataSection({ 
   personalData, 
   onChange,
+  simplyfied,
 }: PersonalDataSectionProps) {
   const isNaturalPerson = personalData.personType === PersonType.NATURAL;
 
@@ -56,20 +58,22 @@ export function PersonalDataSection({
         </Box>
       </Box>
 
+      {!simplyfied && (
       <DocumentSection
         documents={personalData.personalDocuments}
         onChange={(newDocuments) => handleChange('personalDocuments', newDocuments)}
-      />
+      />)}
 
       <ContactSection
         contacts={personalData.contacts}
         onChange={(newContacts) => handleChange('contacts', newContacts)}
       />
 
-      <AddressSection
+
+      {!simplyfied && (<AddressSection
         addresses={personalData.addresses}
         onChange={(newAddresses) => handleChange('addresses', newAddresses)}
-      />
+      />)}
 
     </Stack>
   );
