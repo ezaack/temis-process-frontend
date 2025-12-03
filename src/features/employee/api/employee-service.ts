@@ -1,11 +1,25 @@
 import apiClient from '../../../config/api';
-import { Employee } from "./api-types";
+import { EmployeeRequest } from "./api-types";
 import { loggedInUser } from "../../auth/api/authService";
-import axios from 'axios';
 
 export const employeeService = {
-  post: async (employee: Employee) => {
-    const response = await apiClient.post(`/office-group/${loggedInUser?.userData.officeGroupId}/employee`, employee);
+  post: async (request: EmployeeRequest) => {
+    const response = await apiClient.post(`/office-group/${loggedInUser?.userData.officeGroupId}/employee`, request);
+    return response.data;
+  },
+
+  search: async (searchParams: any) => {
+    const response = await apiClient.post(
+      `/office-group/${loggedInUser?.userData.officeGroupId}/employee/search`,
+      searchParams
+    );
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await apiClient.delete(
+      `/office-group/${loggedInUser?.userData.officeGroupId}/employee?id=${id}`
+    );
     return response.data;
   },
 }; 

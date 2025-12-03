@@ -23,7 +23,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  MenuItem,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -31,118 +30,107 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as PersonIcon,
-  Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { PersonType } from '../../../components/shared/enums';
-import { loggedInUser } from '../../auth/api/authService';
-import { clientService } from '../api/clientService';
+import { useUserContext } from '../../context/UserContext';
+import { loggedInUser } from '../../features/auth/api/authService';
+import { employeeService } from '../../features/employee/api/employee-service';
 
-interface Client {
+interface EmployeeData {
   id: string;
-  client: {
-    description: string;
+  employee: {
     personalData: {
       name: string;
       namePart2: string;
       displayName: string;
-      personType: PersonType;
       contacts: Array<{
         type: string;
         value: string;
       }>;
     };
+    employeeType: string;
+    roles: string[];
   };
 }
 
-// Add new interface for the paged response
 interface PagedResponse {
   count: number;
   pageSize: number;
   currentPageIndex: number;
   numberOfPages: number;
-  content: Client[]; // This will hold the array of clients
+  content: EmployeeData[];
 }
 
 interface Filters {
   name: string;
-  document: string;
-  personType: PersonType | '';
 }
 
-export function Clients() {
+export function Employees() {
   const navigate = useNavigate();
-  const [clients, setClients] = useState<Client[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     name: '',
-    document: '',
-    personType: ''
   });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
-  const fetchClients = async () => {
-    do{
-      if(!loggedInUser){
-        console.log('skip call!!')
+  const fetchEmployees = async () => {
+    do {
+      if (!loggedInUser) {
+        console.log('skip call!!');
         continue;
       }
       console.log(loggedInUser);
-    try {
-      const response:any = await clientService.search({
-        pageIndex: page,
-        pageSize: rowsPerPage,
-        example: {
-          personalData: {
-            name: filters.name || undefined,
-            personType: filters.personType || undefined,
-            personalDocuments: filters.document ? [{
-              value: filters.document
-            }] : undefined
-          }
-        }
+      try {
+        const response: any = await employeeService.search({
+          pageIndex: page,
+          pageSize: rowsPerPage,
+          example: {
+            personalData: {
+              name: filters.name || undefined,
+            },
+          },
+        });
+
+        setEmployees(response.content || []);
+        setTotalCount(response.count || 0);
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        toast.error('Erro ao carregar colaboradores');
+      } finally {
+        setLoading(false);
       }
-    );
-      
-      setClients(response.content || []);
-      setTotalCount(response.count || 0);
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-      toast.error('Erro ao carregar clientes');
-    } finally {
-      setLoading(false);
-    }
-  }while(!loggedInUser);
+    } while (!loggedInUser);
   };
 
   useEffect(() => {
-    fetchClients();
+    fetchEmployees();
   }, [page, rowsPerPage, filters]);
 
   const handleDeleteClick = (id: string) => {
-    setClientToDelete(id);
+    setEmployeeToDelete(id);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (clientToDelete) {
+    if (employeeToDelete) {
       try {
-        await axios.delete(`https://termis-process-service-6klewh6jvq-lz.a.run.app/v0/clients?id=${clientToDelete}`);
-        toast.success('Cliente excluído com sucesso');
-        fetchClients();
+        await employeeService.delete(employeeToDelete);
+        toast.success('Colaborador excluído com sucesso');
+        fetchEmployees();
       } catch (error) {
-        console.error('Error deleting client:', error);
-        toast.error('Erro ao excluir cliente');
+        console.error('Error deleting employee:', error);
+        toast.error('Erro ao excluir colaborador');
       }
     }
     setDeleteDialogOpen(false);
-    setClientToDelete(null);
+    setEmployeeToDelete(null);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -155,11 +143,11 @@ export function Clients() {
   };
 
   const handleFilterChange = (field: keyof Filters) => (
-    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [field]: event.target.value
+      [field]: event.target.value,
     }));
     setPage(0);
   };
@@ -169,14 +157,14 @@ export function Clients() {
       {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h5" fontWeight="bold">
-          Clientes
+          Colaboradores
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate('/client-form')}
+          onClick={() => navigate('/employee-form')}
         >
-          Novo Cliente
+          Novo Colaborador
         </Button>
       </Box>
 
@@ -198,37 +186,19 @@ export function Clients() {
                 ),
               }}
             />
-            <TextField
-              label="Documento"
-              placeholder="CPF/CNPJ..."
-              variant="outlined"
-              value={filters.document}
-              onChange={handleFilterChange('document')}
-            />
-            <TextField
-              select
-              label="Tipo de Pessoa"
-              value={filters.personType}
-              onChange={handleFilterChange('personType')}
-              sx={{ minWidth: 200 }}
-            >
-              <MenuItem value="">Todos</MenuItem>
-              <MenuItem value={PersonType.NATURAL}>Pessoa Física</MenuItem>
-              <MenuItem value={PersonType.LEGAL}>Pessoa Jurídica</MenuItem>
-            </TextField>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Client List */}
+      {/* Employee List */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>
               <TableCell>Tipo</TableCell>
-              <TableCell>Descrição</TableCell>
               <TableCell>Contatos</TableCell>
+              <TableCell>Funções</TableCell>
               <TableCell align="right">Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -244,58 +214,51 @@ export function Clients() {
                   <TableCell><Skeleton /></TableCell>
                 </TableRow>
               ))
-            ) : clients.length === 0 ? (
+            ) : employees.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">
                   <Box sx={{ py: 3 }}>
                     <Typography color="text.secondary">
-                      Nenhum cliente encontrado
+                      Nenhum colaborador encontrado
                     </Typography>
                   </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              clients.map((clientData) => (
-                <TableRow 
-                  key={clientData.id} 
-                  hover 
+              employees.map((employeeData) => (
+                <TableRow
+                  key={employeeData.id}
+                  hover
                   sx={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/clients/${clientData.id}`)}
+                  onClick={() => navigate(`/employees/${employeeData.id}`)}
                 >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                      {clientData.client.personalData.personType === PersonType.NATURAL ? (
-                        <PersonIcon color="action" />
-                      ) : (
-                        <BusinessIcon color="action" />
-                      )}
+                      <PersonIcon color="action" />
                       <Box>
                         <Typography>
-                          {clientData.client.personalData.name}
-                          {clientData.client.personalData.personType === PersonType.NATURAL && 
-                            ` ${clientData.client.personalData.namePart2 || ''}`
-                          }
+                          {employeeData.employee.personalData.name}
+                          {employeeData.employee.personalData.namePart2 && ` ${employeeData.employee.personalData.namePart2}`}
                         </Typography>
-                        {clientData.client.personalData.personType === PersonType.LEGAL && 
+                        {employeeData.employee.personalData.displayName && (
                           <Typography variant="body2" color="text.secondary">
-                            {clientData.client.personalData.displayName || ''}
+                            {employeeData.employee.personalData.displayName}
                           </Typography>
-                        }
+                        )}
                       </Box>
                     </Box>
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={clientData.client.personalData.personType === PersonType.NATURAL ? 'Pessoa Física' : 'Pessoa Jurídica'}
+                      label={employeeData.employee.employeeType || 'Não especificado'}
                       size="small"
-                      color={clientData.client.personalData.personType === PersonType.NATURAL ? 'primary' : 'secondary'}
+                      color="primary"
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{clientData.client.description}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {clientData.client.personalData.contacts?.map((contact, index) => (
+                      {employeeData.employee.personalData.contacts?.map((contact, index) => (
                         <Tooltip key={index} title={contact.type}>
                           <Chip
                             label={contact.value}
@@ -306,12 +269,28 @@ export function Clients() {
                       ))}
                     </Box>
                   </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {employeeData.employee.roles?.map((role, index) => (
+                        <Chip
+                          key={index}
+                          label={role}
+                          size="small"
+                          color="secondary"
+                          variant="outlined"
+                        />
+                      ))}
+                    </Box>
+                  </TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                       <Tooltip title="Editar">
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/client-form/${clientData.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/employee-form/${employeeData.id}`);
+                          }}
                         >
                           <EditIcon />
                         </IconButton>
@@ -320,7 +299,10 @@ export function Clients() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteClick(clientData.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(employeeData.id);
+                          }}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -350,7 +332,7 @@ export function Clients() {
       >
         <DialogTitle>Confirmar Exclusão</DialogTitle>
         <DialogContent>
-          Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+          Tem certeza que deseja excluir este colaborador? Esta ação não pode ser desfeita.
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>

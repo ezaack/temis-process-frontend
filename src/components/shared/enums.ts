@@ -76,6 +76,18 @@ export enum DocumentType {
   DRIVER_LICENSE = 'DRIVER_LICENSE'
 }
 
+export enum EmployeeType {
+    SECRETARY = 'SECRETARY',
+    FINANCIAL_TECHNITIAN = 'FINANCIAL_TECHNITIAN',
+    FINANCIAL_ANALIST = 'FINANCIAL_ANALIST',
+    FINANCIAL_MANAGER = 'FINANCIAL_MANAGER',
+    LAWYER_ASSISTANT = 'LAWYER_ASSISTANT',
+    LAW_ANALIST = 'LAW_ANALIST',
+    LAWYER = 'LAWYER',
+    UNIT_MANAGER = 'UNIT_MANAGER',
+    GROUP_MANAGER = 'GROUP_MANAGER'
+}
+
 // Helper object para labels em português (opcional)
 export const EnumLabels = {
   AddressType: {
@@ -147,6 +159,17 @@ export const EnumLabels = {
     [RepresentativeType.CFO]: 'CFO',
     [RepresentativeType.PRESIDENT]: 'Presidente',
     [RepresentativeType.BOARD_MEMBER]: 'Membro do Conselho'
+  },
+  EmployeeType: {
+    [EmployeeType.SECRETARY]: 'Secretária(o)',
+    [EmployeeType.FINANCIAL_TECHNITIAN]: 'Técnico Financeiro',
+    [EmployeeType.FINANCIAL_ANALIST]: 'Analista Financeiro',
+    [EmployeeType.FINANCIAL_MANAGER]: 'Gerente Financeiro',
+    [EmployeeType.LAWYER_ASSISTANT]: 'Assistente Jurídico',
+    [EmployeeType.LAW_ANALIST]: 'Analista Jurídico',
+    [EmployeeType.LAWYER]: 'Advogado(a)',
+    [EmployeeType.UNIT_MANAGER]: 'Gerente de Unidade',
+    [EmployeeType.GROUP_MANAGER]: 'Gerente de Grupo'
   }
 } as const;
 

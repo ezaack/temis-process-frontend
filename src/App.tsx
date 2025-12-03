@@ -23,6 +23,7 @@ import { Login } from './features/auth/component/Login';
 import PrivateRoute from './components/PrivateRoute';
 import { UserProvider } from './context/UserContext';
 import EmployeeForm from './pages/employee/EmployeeFrom';
+import { Employees } from './pages/employee/Employees';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -225,7 +226,32 @@ function App() {
           path="/employee-form"
           element={
             <PrivateRoute>
-              <EmployeeForm />
+              <>
+                <PageTitle title="Cadastro de Colaborador" />
+                <EmployeeForm />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Colaboradores" />
+                <Employees />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/employees/:id"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Detalhes do Colaborador" />
+                <Employees />
+              </>
             </PrivateRoute>
           }
         />

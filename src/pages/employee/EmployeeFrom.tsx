@@ -9,11 +9,15 @@ import {
   Stack,
   Grid,
   CircularProgress,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
 
 import { PersonalDataSection } from '../../features/client/component/PersonalDataSection';
 import { toast } from 'react-toastify';
-import { ContactType, PersonType } from '../../components/shared/enums';
+import { ContactType, PersonType, EmployeeType, EnumLabels } from '../../components/shared/enums';
 import { Employee } from '../../features/employee/api/api-types';
 import { employeeService } from '../../features/employee/api/employee-service';
 
@@ -41,8 +45,7 @@ export function EmployeeForm() {
       personalDocuments: []
     },
     employeeType: "",
-    officeUnitIds: [],
-    roles: []
+    officeUnitIds: []
   });
 
   const [error, setError] = useState('');
@@ -56,13 +59,14 @@ export function EmployeeForm() {
       contact => contact.type === ContactType.WORK_EMAIL
     );
 
-    if (!formData.personalData.name || !workEmail?.value) {
-      setError('All fields marked with (*) are required'); // Set an error message if validation fails
+    if (!formData.personalData.name || !workEmail?.value || !formData.employeeType) {
+      setError('Todos os campos marcados com (*) são obrigatórios');
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      const signUpData = {
+      const employee = {
           personalData: {
             name: formData.personalData.name,
             namePart2: formData.personalData.namePart2,
@@ -74,13 +78,15 @@ export function EmployeeForm() {
             personalDocuments: formData.personalData.personalDocuments,
           },
           employeeType: formData.employeeType,
-          officeUnitIds: formData.officeUnitIds,
-          roles: formData.roles
+          officeUnitIds: formData.officeUnitIds
       };
       // Call the signup service
       
       console.log(' #### submiting the employee data');
-      await employeeService.post(signUpData);
+      await employeeService.post({
+        employee:employee,
+        roles:[]
+      });
       toast.success('Colaborador inserido'); // Show success message
       navigate('/employees'); // Redirect to the login page after successful signup
     } catch (err) {
@@ -107,6 +113,31 @@ export function EmployeeForm() {
               })}
               simplyfied={true}
             />
+
+            {/* Employee Type Select */}
+            <FormControl fullWidth required>
+              <InputLabel id="employee-type-label">Tipo de Colaborador</InputLabel>
+              <Select
+                labelId="employee-type-label"
+                id="employee-type"
+                value={formData.employeeType}
+                label="Tipo de Colaborador"
+                onChange={(e) => setFormData({
+                  ...formData,
+                  employeeType: e.target.value
+                })}
+              >
+                <MenuItem value="">
+                  <em>Selecione...</em>
+                </MenuItem>
+                {Object.entries(EmployeeType).map(([key, value]) => (
+                  <MenuItem key={value} value={value}>
+                    {EnumLabels.EmployeeType[value]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <Box sx={{ mt: 2 }}>
               <Button
                 fullWidth
