@@ -13,6 +13,9 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Chip,
+  OutlinedInput,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { PersonalDataSection } from '../../features/client/component/PersonalDataSection';
@@ -20,6 +23,7 @@ import { toast } from 'react-toastify';
 import { ContactType, PersonType, EmployeeType, EnumLabels } from '../../components/shared/enums';
 import { Employee } from '../../features/employee/api/api-types';
 import { employeeService } from '../../features/employee/api/employee-service';
+import { loggedInUser } from '../../features/auth/api/authService';
 
 
 export function EmployeeForm() {
@@ -59,7 +63,7 @@ export function EmployeeForm() {
       contact => contact.type === ContactType.WORK_EMAIL
     );
 
-    if (!formData.personalData.name || !workEmail?.value || !formData.employeeType) {
+    if (!formData.personalData.name || !workEmail?.value || !formData.employeeType || formData.officeUnitIds.length === 0) {
       setError('Todos os campos marcados com (*) são obrigatórios');
       setIsSubmitting(false);
       return;
@@ -135,6 +139,51 @@ export function EmployeeForm() {
                     {EnumLabels.EmployeeType[value]}
                   </MenuItem>
                 ))}
+              </Select>
+            </FormControl>
+
+            {/* Office Units Multiple Select */}
+            <FormControl fullWidth required>
+              <InputLabel id="office-units-label">Unidades</InputLabel>
+              <Select
+                labelId="office-units-label"
+                id="office-units"
+                multiple
+                value={formData.officeUnitIds}
+                onChange={(e: SelectChangeEvent<string[]>) => {
+                  const value = e.target.value;
+                  setFormData({
+                    ...formData,
+                    officeUnitIds: typeof value === 'string' ? value.split(',') : value
+                  });
+                }}
+                input={<OutlinedInput label="Unidades" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((unitId) => {
+                      const unit = loggedInUser?.userData.officeUnits?.find(
+                        (u) => u.officeUnitId === unitId
+                      );
+                      return (
+                        <Chip
+                          key={unitId}
+                          label={unit?.officeUnitName || unitId}
+                          size="small"
+                        />
+                      );
+                    })}
+                  </Box>
+                )}
+              >
+                {loggedInUser?.userData.officeUnits?.map((unit) => (
+                  <MenuItem key={unit.officeUnitId} value={unit.officeUnitId}>
+                    {unit.officeUnitName}
+                  </MenuItem>
+                )) || (
+                  <MenuItem disabled>
+                    <em>Nenhuma unidade disponível</em>
+                  </MenuItem>
+                )}
               </Select>
             </FormControl>
 
