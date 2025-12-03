@@ -8,6 +8,7 @@ import {
   Button,
   Grid,
   Snackbar,
+  CircularProgress,
 } from '@mui/material';
 import { Alert } from '@mui/material';
 import { useUserContext } from '../../../context/UserContext';
@@ -21,9 +22,11 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const userData = await authService.login({ login, password });
       setUser(userData); // Store user data in context
@@ -31,6 +34,8 @@ export function Login() {
     } catch (err) {
       setError('Login failed. Please check your credentials.');
       setOpenSnackbar(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,8 +86,10 @@ export function Login() {
                 variant="contained"
                 color="primary"
                 fullWidth
+                disabled={isSubmitting}
+                startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                Login
+                {isSubmitting ? 'Entrando...' : 'Login'}
               </Button>
             </Grid>
           </Grid>

@@ -6,7 +6,8 @@ import {
   Box,
   Button,
   TextField,
-  Stack
+  Stack,
+  CircularProgress
 } from '@mui/material';
 import { toast } from 'react-toastify';
 
@@ -100,6 +101,7 @@ export function OfficeForm() {
                 type="submit"
                 size="large"
                 disabled={isSubmitting}
+                startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
               >
                 {isSubmitting ? 'Salvando...' : 'Salvar Escritório'}
               </Button>

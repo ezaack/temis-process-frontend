@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
+import {
   Paper,
   Typography,
   Box,
@@ -8,6 +8,7 @@ import {
   TextField,
   Stack,
   Grid,
+  CircularProgress,
 } from '@mui/material';
 
 import { PersonalDataSection } from '../../features/client/component/PersonalDataSection';
@@ -113,6 +114,7 @@ export function EmployeeForm() {
                 type="submit"
                 size="large"
                 disabled={isSubmitting}
+                startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
               >
                 {isSubmitting ? 'Salvando...' : 'Enviar'}
               </Button>

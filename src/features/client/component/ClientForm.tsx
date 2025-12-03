@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { 
+import {
   Paper,
   Typography,
   Box,
@@ -11,7 +11,8 @@ import {
   InputLabel,
   Stack,
   Select,
-  MenuItem} from '@mui/material';
+  MenuItem,
+  CircularProgress} from '@mui/material';
 import { EnumLabels, PersonType } from '../../../components/shared/enums';
 import { toast } from 'react-toastify';
 import { PersonalDataSection } from './PersonalDataSection';
@@ -257,6 +258,7 @@ export function ClientForm() {
                 type="submit"
                 size="large"
                 disabled={isSubmitting}
+                startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
               >
                 {isSubmitting ? 'Salvando...' : 'Salvar Cliente'}
               </Button>
