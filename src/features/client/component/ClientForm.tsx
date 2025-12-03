@@ -185,7 +185,7 @@ export function ClientForm() {
               onChange={(e) => setFormData({...formData, howDidYouHearAboutUs: e.target.value})}
             />
             <Box>
-            <InputLabel sx={{ mb: 1 }}>Escritório</InputLabel>
+            <InputLabel sx={{ mb: 1 }}>Unidade</InputLabel>
             <Select
               fullWidth
               value={formData.howDidYouHearAboutUs ?? ''}

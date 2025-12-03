@@ -185,7 +185,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Novo Escritório" />
+                <PageTitle title="Novo Unidade" />
                 <OfficeForm />
               </>
             </PrivateRoute>
@@ -196,7 +196,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Editar Escritório" />
+                <PageTitle title="Editar Unidade" />
                 <OfficeForm />
               </>
             </PrivateRoute>
@@ -207,7 +207,7 @@ function App() {
           element={
             <PrivateRoute>
               <>
-                <PageTitle title="Detalhes do Escritório" />
+                <PageTitle title="Detalhes do Unidade" />
                 <OfficeDetail />
               </>
             </PrivateRoute>

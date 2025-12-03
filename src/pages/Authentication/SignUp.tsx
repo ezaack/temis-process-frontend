@@ -169,7 +169,7 @@ export function SignUp() {
               />
             </Grid>
              <Typography variant="h6" gutterBottom>
-              Dados do Escritório
+              Dados do Unidade
             </Typography>
             <OfficeGroupSection
               officeGroupData={formData.officeGroupData}

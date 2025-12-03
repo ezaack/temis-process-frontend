@@ -458,7 +458,7 @@ export function ClientDetail() {
                       25/04/2024 às 10:00
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Escritório - Sala de Reuniões
+                      Unidade - Sala de Reuniões
                     </Typography>
                   </Box>
                 }

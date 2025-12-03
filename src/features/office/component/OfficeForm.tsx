@@ -49,11 +49,11 @@ export function OfficeForm() {
         await officeService.createUnit(groupResponse.id, unit);
       }
 
-      toast.success('Escritório criado com sucesso!');
+      toast.success('Unidade criado com sucesso!');
       navigate('/offices');
     } catch (error) {
       console.error('Error saving office:', error);
-      toast.error('Erro ao criar escritório');
+      toast.error('Erro ao criar unidade');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,7 +71,7 @@ export function OfficeForm() {
     <Paper elevation={1}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 2 }}>
         <Typography variant="h6">
-          Novo Escritório
+          Novo Unidade
         </Typography>
       </Box>
 
@@ -103,7 +103,7 @@ export function OfficeForm() {
                 disabled={isSubmitting}
                 startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {isSubmitting ? 'Salvando...' : 'Salvar Escritório'}
+                {isSubmitting ? 'Salvando...' : 'Salvar Unidade'}
               </Button>
             </Box>
           </Stack>

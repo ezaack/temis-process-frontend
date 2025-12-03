@@ -95,7 +95,7 @@ export function OfficeDetail() {
   if (!officeGroup) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <Typography>Escritório não encontrado</Typography>
+        <Typography>Unidade não encontrado</Typography>
       </Box>
     );
   }
@@ -123,7 +123,7 @@ export function OfficeDetail() {
             onClick={() => navigate(`/office-form/${officeGroup.id}`)}
             sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
           >
-            Editar Escritório
+            Editar Unidade
           </Button>
         </Box>
         <Grid container spacing={3}>
@@ -149,7 +149,7 @@ export function OfficeDetail() {
       {/* Office Units Section */}
       <Typography variant="h5" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
         <StoreIcon />
-        Unidades do Escritório ({officeUnits.length})
+        Unidades do Unidade ({officeUnits.length})
       </Typography>
 
       {officeUnits.map((unit, index) => (
