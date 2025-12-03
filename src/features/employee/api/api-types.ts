@@ -4,9 +4,5 @@ export interface Employee {
     personalData: PersonalDataResource;
     employeeType: string;
     officeUnitIds: string[];
-    signUpData: {
-        login: string | null;
-        password: string | null;
-    };
     roles: string[];
 }

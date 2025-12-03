@@ -41,10 +41,6 @@ export function EmployeeForm() {
     },
     employeeType: "",
     officeUnitIds: [],
-    signUpData: {
-      login: '',
-      password: ''
-    },
     roles: []
   });
 
@@ -55,17 +51,17 @@ export function EmployeeForm() {
     console.log(' #### handler SignUp submit');
     e.preventDefault(); // Prevent the default form submission behavior
 
-    // Validate the form data
-    if (!formData.personalData.contacts?.find(c => c.type === ContactType.WORK_EMAIL)?.value || 
-      !formData.signUpData.password || 
-      !formData.personalData.name) {
+    const workEmail = formData.personalData.contacts?.find(
+      contact => contact.type === ContactType.WORK_EMAIL
+    );
+
+    if (!formData.personalData.name || !workEmail?.value) {
       setError('All fields marked with (*) are required'); // Set an error message if validation fails
       return;
     }
 
     try {
       const signUpData = {
-        "employee": {
           personalData: {
             name: formData.personalData.name,
             namePart2: formData.personalData.namePart2,
@@ -78,12 +74,7 @@ export function EmployeeForm() {
           },
           employeeType: formData.employeeType,
           officeUnitIds: formData.officeUnitIds,
-        },
-        signUpData: {
-          login: formData.personalData.contacts?.find(c => c.type === ContactType.WORK_EMAIL)?.value || formData.signUpData.login,
-          password: formData.signUpData.password,
-        },
-        roles: formData.roles
+          roles: formData.roles
       };
       // Call the signup service
       
@@ -115,23 +106,6 @@ export function EmployeeForm() {
               })}
               simplyfied={true}
             />
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                variant="outlined"
-                value={formData.signUpData.password}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  signUpData: {
-                    ...formData.signUpData,
-                    password: e.target.value
-                  }
-                })}
-                required
-              />
-            </Grid>
             <Box sx={{ mt: 2 }}>
               <Button
                 fullWidth
