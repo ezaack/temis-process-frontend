@@ -240,6 +240,7 @@ export function ClientForm() {
                 ...formData,
                 personalData: newPersonalData
               })}
+              simplyfied={true}
             />
              <RepresentativeSection
               representatives={formData.representatives}

@@ -120,7 +120,7 @@ export function RepresentativeSection({ representatives, onChange }: Representat
                 onChange={(newPersonalData) => {
                   handleRepresentativeChange(index, 'personalData', newPersonalData);
                 }}
-                isRepresentative={true}
+                simplyfied={true}
               />
             </Stack>
           </Paper>

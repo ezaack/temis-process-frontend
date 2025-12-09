@@ -67,8 +67,7 @@ export function SignUp() {
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Validate the form data
-    if (!formData.signUpData.login || 
-      !formData.signUpData.password || 
+    if (!formData.signUpData.password || 
       !formData.customerData.name) {
       setError('All fields marked with (*) are required'); // Set an error message if validation fails
       return;
@@ -99,7 +98,7 @@ export function SignUp() {
           addresses: formData.groupMatrixUnitData.addresses,
         },
         signUpData: {
-          login: formData.signUpData.login,
+          login: formData.customerData.contacts?.find(c => c.type === ContactType.WORK_EMAIL)?.value || '',
           password: formData.signUpData.password,
         },
       };
@@ -134,23 +133,8 @@ export function SignUp() {
                 ...formData,
                 customerData: newPersonalData
               })}
+              simplyfied={true}
             />
-                        <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Login"
-                variant="outlined"
-                value={formData.signUpData.login}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  signUpData: {
-                    ...formData.signUpData,
-                    login: e.target.value
-                  }
-                })}
-                required
-              />
-            </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
