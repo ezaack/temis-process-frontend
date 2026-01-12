@@ -1,17 +1,9 @@
 openapi: 3.0.1
 info:
-  title: My REST API
-  description: Some custom description of API.
-  contact:
-    name: Sallo Szrajbman
-    url: salloszraj@gmail.com
-    email: www.baeldung.com
-  license:
-    name: License of API
-    url: API license URL
-  version: "1.0"
+  title: OpenAPI definition
+  version: v0
 servers:
-- url: https://termis-process-service-6klewh6jvq-lz.a.run.app
+- url: http://localhost:8080
   description: Generated server url
 security:
 - Bearer Authentication: []
@@ -19,7 +11,7 @@ paths:
   /v0/office-group:
     get:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: fetchById
       responses:
         "200":
@@ -30,7 +22,7 @@ paths:
                 $ref: "#/components/schemas/OfficeGroupResponse"
     put:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: update
       requestBody:
         content:
@@ -47,7 +39,7 @@ paths:
                 $ref: "#/components/schemas/OfficeGroupResponse"
     post:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: create
       requestBody:
         content:
@@ -64,7 +56,7 @@ paths:
                 $ref: "#/components/schemas/OfficeGroupResponse"
     delete:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: delete
       parameters:
       - name: id
@@ -80,10 +72,148 @@ paths:
             '*/*':
               schema:
                 type: boolean
+  /v0/office-group/{groupId}/tarefas/{tarefaId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
+    put:
+      tags:
+      - tarefa-controller
+      operationId: updateTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
+    delete:
+      tags:
+      - tarefa-controller
+      operationId: deleteTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+  /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status/{statusId}:
+    put:
+      tags:
+      - quadro-tarefas-controller
+      operationId: updateStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusTarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StatusTarefaResource"
+    delete:
+      tags:
+      - quadro-tarefas-controller
+      operationId: deleteStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
   /v0/office-group/{groupId}/office-unit:
     put:
       tags:
-      - office-unit-controller
+      - unidade-controller
       operationId: update_1
       parameters:
       - name: groupId
@@ -107,7 +237,7 @@ paths:
                 $ref: "#/components/schemas/OfficeUnitResponse"
     post:
       tags:
-      - office-unit-controller
+      - unidade-controller
       operationId: create_1
       parameters:
       - name: groupId
@@ -131,7 +261,7 @@ paths:
                 $ref: "#/components/schemas/OfficeUnitResponse"
     delete:
       tags:
-      - office-unit-controller
+      - unidade-controller
       operationId: delete_1
       parameters:
       - name: groupId
@@ -156,7 +286,7 @@ paths:
   /v0/office-group/{groupId}/employee:
     put:
       tags:
-      - employee-controller
+      - colaborador-controller
       operationId: update_2
       parameters:
       - name: groupId
@@ -169,7 +299,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EmployeeUpdateRequest"
+              $ref: "#/components/schemas/AtualizarColaboradorRequest"
         required: true
       responses:
         "200":
@@ -177,10 +307,10 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/EmployeeResponse"
+                $ref: "#/components/schemas/ColaboradorResponse"
     post:
       tags:
-      - employee-controller
+      - colaborador-controller
       operationId: create_2
       parameters:
       - name: groupId
@@ -193,7 +323,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EmployeeCreateRequest"
+              $ref: "#/components/schemas/CriarColaboradorRequest"
         required: true
       responses:
         "200":
@@ -201,10 +331,10 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/EmployeeResponse"
+                $ref: "#/components/schemas/ColaboradorResponse"
     delete:
       tags:
-      - employee-controller
+      - colaborador-controller
       operationId: delete_2
       parameters:
       - name: groupId
@@ -229,7 +359,7 @@ paths:
   /v0/office-group/{groupId}/clients:
     put:
       tags:
-      - client-controller
+      - cliente-controller
       operationId: clientUpdate
       parameters:
       - name: groupId
@@ -253,7 +383,7 @@ paths:
                 $ref: "#/components/schemas/ClientResponse"
     post:
       tags:
-      - client-controller
+      - cliente-controller
       operationId: clientCreate
       parameters:
       - name: groupId
@@ -277,7 +407,7 @@ paths:
                 $ref: "#/components/schemas/ClientResponse"
     delete:
       tags:
-      - client-controller
+      - cliente-controller
       operationId: clientDelete
       parameters:
       - name: groupId
@@ -299,10 +429,253 @@ paths:
             '*/*':
               schema:
                 type: boolean
+  /v0/office-group/{groupId}/caso/{casoId}:
+    get:
+      tags:
+      - caso-controller
+      operationId: getCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CasoDetailResource"
+    put:
+      tags:
+      - caso-controller
+      operationId: updateCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCasoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CasoDetailResource"
+    delete:
+      tags:
+      - caso-controller
+      operationId: deleteCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+  /v0/office-group/{groupId}/tarefas/status/{statusId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
+    post:
+      tags:
+      - tarefa-controller
+      operationId: createTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status:
+    post:
+      tags:
+      - quadro-tarefas-controller
+      operationId: createStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusTarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StatusTarefaResource"
+  /v0/office-group/{groupId}/quadro-tarefas/from-template/{templateId}:
+    post:
+      tags:
+      - quadro-tarefas-controller
+      operationId: createFromTemplate
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuadroTarefasResource"
+  /v0/office-group/{groupId}/process:
+    post:
+      tags:
+      - processo-controller
+      operationId: criarProcesso
+      parameters:
+      - name: groupId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: processResource
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/ProcessResource"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CreateProcessResponse"
+  /v0/office-group/{groupId}/process/{processId}/movement:
+    post:
+      tags:
+      - movimentar-processo-controller
+      operationId: criarMovimentacao
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: processId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessMovementRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProcessStateResponse"
   /v0/office-group/{groupId}/office-unit/search:
     post:
       tags:
-      - office-unit-controller
+      - unidade-controller
       operationId: search
       parameters:
       - name: groupId
@@ -327,7 +700,7 @@ paths:
   /v0/office-group/{groupId}/employee/search:
     post:
       tags:
-      - employee-controller
+      - colaborador-controller
       operationId: search_1
       parameters:
       - name: groupId
@@ -340,7 +713,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PagedFilterEmployeeResource"
+              $ref: "#/components/schemas/PagedFilterColaboradorResource"
         required: true
       responses:
         "200":
@@ -348,11 +721,11 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PagedResponseEmployeeResponse"
+                $ref: "#/components/schemas/PagedResponseColaboradorResponse"
   /v0/office-group/{groupId}/clients/search:
     post:
       tags:
-      - client-controller
+      - cliente-controller
       operationId: clientSearch
       parameters:
       - name: groupId
@@ -374,10 +747,60 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseClientResponse"
+  /v0/office-group/{groupId}/caso:
+    post:
+      tags:
+      - caso-controller
+      operationId: criarCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CasoResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CreateCasoResponse"
+  /v0/office-group/{groupId}/caso/search:
+    post:
+      tags:
+      - caso-controller
+      operationId: searchCasos
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CasoFilterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseCasoDetailResource"
   /v0/office-group/search:
     post:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: search_2
       requestBody:
         content:
@@ -392,7 +815,7 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseOfficeGroupResponse"
-  /signup:
+  /v0/auth/signup:
     post:
       tags:
       - sign-up-controller
@@ -410,7 +833,7 @@ paths:
             '*/*':
               schema:
                 type: object
-  /auth/signin:
+  /v0/auth/signin:
     post:
       tags:
       - auth-controller
@@ -428,10 +851,109 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/JwtDto"
+  /v0/office-group/{groupId}/tarefas/{tarefaId}/reorder:
+    patch:
+      tags:
+      - tarefa-controller
+      operationId: reorderTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/tarefas/{tarefaId}/move:
+    patch:
+      tags:
+      - tarefa-controller
+      operationId: moveTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoveTarefaRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status/{statusId}/reorder:
+    patch:
+      tags:
+      - quadro-tarefas-controller
+      operationId: reorderStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StatusTarefaResource"
   /v0/office-group/{id}:
     get:
       tags:
-      - office-group-controller
+      - escritorio-controller
       operationId: fetchById_1
       parameters:
       - name: id
@@ -447,10 +969,162 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OfficeGroupResponse"
+  /v0/office-group/{groupId}/tarefas/quadro/{quadroId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByQuadro
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/tarefas/colaborador/{colaboradorId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByColaborador
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: colaboradorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/tarefas/caso/{casoId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
+  /v0/office-group/{groupId}/quadro-tarefas/{quadroId}:
+    get:
+      tags:
+      - quadro-tarefas-controller
+      operationId: getQuadroTarefas
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuadroTarefasResource"
+  /v0/office-group/{groupId}/quadro-tarefas/templates:
+    get:
+      tags:
+      - quadro-tarefas-controller
+      operationId: getAllTemplates
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuadroTarefasResource"
+  /v0/office-group/{groupId}/quadro-tarefas/caso/{casoId}:
+    get:
+      tags:
+      - quadro-tarefas-controller
+      operationId: getQuadroTarefasByCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuadroTarefasResource"
   /v0/office-group/{groupId}/office-unit/{id}:
     get:
       tags:
-      - office-unit-controller
+      - unidade-controller
       operationId: fetchById_2
       parameters:
       - name: groupId
@@ -475,7 +1149,7 @@ paths:
   /v0/office-group/{groupId}/employee/{id}:
     get:
       tags:
-      - employee-controller
+      - colaborador-controller
       operationId: fetchById_3
       parameters:
       - name: groupId
@@ -496,11 +1170,11 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/EmployeeResponse"
+                $ref: "#/components/schemas/ColaboradorResponse"
   /v0/office-group/{groupId}/clients/{id}:
     get:
       tags:
-      - client-controller
+      - cliente-controller
       operationId: fetchClientById
       parameters:
       - name: groupId
@@ -549,6 +1223,71 @@ components:
           format: uuid
         officeGroupData:
           $ref: "#/components/schemas/OfficeGroupResource"
+    TarefaResource:
+      required:
+      - titulo
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        statusId:
+          type: string
+          format: uuid
+        colaboradorId:
+          type: string
+          format: uuid
+        titulo:
+          maxLength: 200
+          minLength: 0
+          type: string
+        descricao:
+          maxLength: 3000
+          minLength: 0
+          type: string
+        solucaoProposta:
+          maxLength: 3000
+          minLength: 0
+          type: string
+        ordem:
+          type: integer
+          format: int32
+        prazo:
+          type: string
+          format: date-time
+        estimativaHoras:
+          type: integer
+          format: int32
+        prioridade:
+          type: string
+          enum:
+          - BAIXA
+          - MEDIA
+          - ALTA
+          - URGENTE
+    StatusTarefaResource:
+      required:
+      - nome
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          maxLength: 100
+          minLength: 0
+          type: string
+        descricao:
+          maxLength: 500
+          minLength: 0
+          type: string
+        ordem:
+          type: integer
+          format: int32
+        cor:
+          maxLength: 7
+          minLength: 0
+          type: string
     OfficeAddressResource:
       type: object
       properties:
@@ -711,23 +1450,15 @@ components:
           - OTHER
         zipCode:
           type: string
-    ContactDataResource:
+    AtualizarColaboradorRequest:
       type: object
       properties:
-        type:
+        id:
           type: string
-          enum:
-          - PERSONAL_CELL_PHONE
-          - PERSONAL_EMAIL
-          - PERSONAL_HOME_PHONE
-          - WORK_CELL_PHONE
-          - WORK_EMAIL
-          - PROFESSIONAL_PHONE
-        value:
-          type: string
-    EmployeeResource:
-      required:
-      - officeUnitIds
+          format: uuid
+        employee:
+          $ref: "#/components/schemas/ColaboradorResource"
+    ColaboradorResource:
       type: object
       properties:
         personalData:
@@ -745,20 +1476,24 @@ components:
           - UNIT_MANAGER
           - GROUP_MANAGER
         officeUnitIds:
-          maxItems: 2147483647
-          minItems: 1
           type: array
           items:
             type: string
             format: uuid
-    EmployeeUpdateRequest:
+    ContactDataResource:
       type: object
       properties:
-        id:
+        type:
           type: string
-          format: uuid
-        employee:
-          $ref: "#/components/schemas/EmployeeResource"
+          enum:
+          - PERSONAL_CELL_PHONE
+          - PERSONAL_EMAIL
+          - PERSONAL_HOME_PHONE
+          - WORK_CELL_PHONE
+          - WORK_EMAIL
+          - PROFESSIONAL_PHONE
+        value:
+          type: string
     PersonalDataResource:
       type: object
       properties:
@@ -806,14 +1541,14 @@ components:
           format: date
         issuingAgency:
           type: string
-    EmployeeResponse:
+    ColaboradorResponse:
       type: object
       properties:
         id:
           type: string
           format: uuid
         employee:
-          $ref: "#/components/schemas/EmployeeResource"
+          $ref: "#/components/schemas/ColaboradorResource"
         username:
           type: string
         roles:
@@ -915,6 +1650,216 @@ components:
           - BOARD_MEMBER
         personalData:
           $ref: "#/components/schemas/PersonalDataResource"
+    CasoEmployeeResource:
+      type: object
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        assigned:
+          type: boolean
+        writePermission:
+          type: boolean
+    UpdateCasoRequest:
+      required:
+      - clientIds
+      - description
+      - employees
+      - id
+      - officeUnitId
+      - title
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/CasoEmployeeResource"
+        clientIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        officeUnitId:
+          type: string
+          format: uuid
+        title:
+          maxLength: 100
+          minLength: 0
+          type: string
+        description:
+          maxLength: 3000
+          minLength: 0
+          type: string
+    CasoDetailResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        titulo:
+          type: string
+        descricao:
+          type: string
+        officeUnitId:
+          type: string
+          format: uuid
+        quadroTarefasId:
+          type: string
+          format: uuid
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/CasoEmployeeResource"
+        clientIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        criadoEm:
+          type: string
+          format: date-time
+        criadoPor:
+          type: string
+        atualizadoEm:
+          type: string
+          format: date-time
+        atualizadoPor:
+          type: string
+    QuadroTarefasResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        statusTarefas:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusTarefaResource"
+        template:
+          type: boolean
+    ProcessEmployeeResource:
+      type: object
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        assigned:
+          type: boolean
+        writePermission:
+          type: boolean
+    ProcessResource:
+      type: object
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessEmployeeResource"
+        clientIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        officeUnitId:
+          type: string
+          format: uuid
+        title:
+          maxLength: 100
+          minLength: 0
+          type: string
+        introduction:
+          maxLength: 3000
+          minLength: 0
+          type: string
+    CreateProcessResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        data:
+          $ref: "#/components/schemas/ProcessResource"
+        processStateEnum:
+          type: string
+          enum:
+          - DRAFT
+          - INITIAL_PETITION_FILED
+          - CITATION
+    ProcessMovementRequest:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - DRAFT_CREATED
+          - INITIAL_SUBMISSION
+          - CITATION_SUBMISSION
+          - CONTESTATION_SUBMISSION
+          - SANITATION_SUBMISSION
+          - ORGANIZATION_SUBMISSION
+          - INSTRUCTION_START
+          - AWAITING_JUDGMENT_SUBMISSION
+          - SENTENCE_PRONOUNCED_SUBMISSION
+          - APPEAL_SUBMISSION
+          - EXECUTION_START
+          - CLOSE_PROCESS
+          - ARCHIVE_PROCESS
+        description:
+          maxLength: 3000
+          minLength: 0
+          type: string
+    ProcessMovementResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - DRAFT_CREATED
+          - INITIAL_SUBMISSION
+          - CITATION_SUBMISSION
+          - CONTESTATION_SUBMISSION
+          - SANITATION_SUBMISSION
+          - ORGANIZATION_SUBMISSION
+          - INSTRUCTION_START
+          - AWAITING_JUDGMENT_SUBMISSION
+          - SENTENCE_PRONOUNCED_SUBMISSION
+          - APPEAL_SUBMISSION
+          - EXECUTION_START
+          - CLOSE_PROCESS
+          - ARCHIVE_PROCESS
+        description:
+          type: string
+        criadoEm:
+          type: string
+          format: date-time
+        criadoPor:
+          type: string
+    ProcessStateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum:
+          - DRAFT
+          - INITIAL_PETITION_FILED
+          - CITATION
+        movement:
+          $ref: "#/components/schemas/ProcessMovementResponse"
+        criadoEm:
+          type: string
+          format: date-time
+        criadoPor:
+          type: string
     PagedFilterOfficeUnitResource:
       type: object
       properties:
@@ -936,19 +1881,19 @@ components:
         pageSize:
           type: integer
           format: int32
-        currentPageIndex:
-          type: integer
-          format: int32
         numberOfPages:
           type: integer
           format: int32
-    EmployeeCreateRequest:
+        currentPageIndex:
+          type: integer
+          format: int32
+    CriarColaboradorRequest:
+      required:
+      - employee
       type: object
       properties:
         employee:
-          $ref: "#/components/schemas/EmployeeResource"
-        signUpData:
-          $ref: "#/components/schemas/SignUpDataResource"
+          $ref: "#/components/schemas/ColaboradorResource"
         roles:
           type: array
           items:
@@ -964,14 +1909,7 @@ components:
             - UPDATE_GROUP
             - DELETE_GROUP
             - ALL
-    SignUpDataResource:
-      type: object
-      properties:
-        login:
-          type: string
-        password:
-          type: string
-    PagedFilterEmployeeResource:
+    PagedFilterColaboradorResource:
       type: object
       properties:
         pageIndex:
@@ -982,8 +1920,8 @@ components:
           format: int32
           example: 10
         example:
-          $ref: "#/components/schemas/EmployeeResource"
-    PagedResponseEmployeeResponse:
+          $ref: "#/components/schemas/ColaboradorResource"
+    PagedResponseColaboradorResponse:
       type: object
       properties:
         count:
@@ -992,10 +1930,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
     ClientCreateRequest:
@@ -1048,10 +1986,82 @@ components:
         pageSize:
           type: integer
           format: int32
+        numberOfPages:
+          type: integer
+          format: int32
         currentPageIndex:
           type: integer
           format: int32
+    CasoResource:
+      required:
+      - clientIds
+      - description
+      - employees
+      - officeUnitId
+      - title
+      type: object
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/CasoEmployeeResource"
+        clientIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        officeUnitId:
+          type: string
+          format: uuid
+        title:
+          maxLength: 100
+          minLength: 0
+          type: string
+        description:
+          maxLength: 3000
+          minLength: 0
+          type: string
+    CreateCasoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        data:
+          $ref: "#/components/schemas/CasoResource"
+    CasoFilterRequest:
+      type: object
+      properties:
+        unidadeId:
+          type: string
+          format: uuid
+        clienteId:
+          type: string
+          format: uuid
+        colaboradorId:
+          type: string
+          format: uuid
+        titulo:
+          type: string
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+    PagedResponseCasoDetailResource:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int32
         numberOfPages:
+          type: integer
+          format: int32
+        currentPageIndex:
           type: integer
           format: int32
     PagedFilterOfficeGroupResource:
@@ -1075,12 +2085,19 @@ components:
         pageSize:
           type: integer
           format: int32
-        currentPageIndex:
-          type: integer
-          format: int32
         numberOfPages:
           type: integer
           format: int32
+        currentPageIndex:
+          type: integer
+          format: int32
+    SignUpDataResource:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
     SignUpNewCostumerResource:
       type: object
       properties:
@@ -1115,11 +2132,6 @@ components:
         officeGroupId:
           type: string
           format: uuid
-        officeUnitIds:
-          type: array
-          items:
-            type: string
-            format: uuid
         fullName:
           type: string
         roles:
@@ -1137,6 +2149,37 @@ components:
             - UPDATE_GROUP
             - DELETE_GROUP
             - ALL
+        officeUnits:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserOfficeUnitData"
+    UserOfficeUnitData:
+      type: object
+      properties:
+        officeUnitId:
+          type: string
+          format: uuid
+        officeUnitName:
+          type: string
+    ReorderRequest:
+      required:
+      - newOrdem
+      type: object
+      properties:
+        newOrdem:
+          type: integer
+          format: int32
+    MoveTarefaRequest:
+      required:
+      - newStatusId
+      type: object
+      properties:
+        newStatusId:
+          type: string
+          format: uuid
+        newOrdem:
+          type: integer
+          format: int32
   securitySchemes:
     Bearer Authentication:
       type: http
