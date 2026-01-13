@@ -35,6 +35,7 @@ import { toast } from 'react-toastify';
 import { loggedInUser } from '../../auth/api/authService';
 import { casoService } from '../api/casoService';
 import type { CasoDetailResource } from '../api/api-types';
+import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 
 interface Filters {
   title: string;
@@ -150,6 +151,9 @@ export const Casos: React.FC = () => {
 
   return (
     <Box>
+      {/* Breadcrumb */}
+      <Breadcrumb pageName="Casos" />
+
       {/* Header */}
       <Box
         sx={{

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useUserContext } from '../../../context/UserContext';
 import { casoService } from '../api/casoService';
 import type { CasoDetailResource } from '../api/api-types';
@@ -65,6 +65,29 @@ export const CasoDetail: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-screen-2xl">
+      {/* Breadcrumb */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+          {caso.titulo}
+        </h2>
+
+        <nav>
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link className="font-medium" to="/">
+                Dashboard /
+              </Link>
+            </li>
+            <li>
+              <Link className="font-medium" to="/casos">
+                Casos /
+              </Link>
+            </li>
+            <li className="font-medium text-primary">{caso.titulo}</li>
+          </ol>
+        </nav>
+      </div>
+
       {/* Header with caso metadata */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

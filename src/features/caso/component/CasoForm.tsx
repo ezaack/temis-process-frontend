@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   TextField,
   Button,
@@ -61,6 +61,10 @@ export const CasoForm: React.FC = () => {
   const [loadingClients, setLoadingClients] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
 
+  // Debounce refs
+  const clientSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const employeeSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Fetch available office units (from user context)
   const availableOfficeUnits = loggedInUser?.userData.officeUnits || [];
 
@@ -70,6 +74,18 @@ export const CasoForm: React.FC = () => {
       loadCaso();
     }
   }, [isEditMode, id]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (clientSearchTimeoutRef.current) {
+        clearTimeout(clientSearchTimeoutRef.current);
+      }
+      if (employeeSearchTimeoutRef.current) {
+        clearTimeout(employeeSearchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const loadCaso = async () => {
     if (!id) return;
@@ -135,69 +151,95 @@ export const CasoForm: React.FC = () => {
     }
   };
 
-  // Search clients
-  const handleSearchClients = async (searchText: string) => {
+  // Search clients with debouncing
+  const handleSearchClients = useCallback((searchText: string) => {
+    // Clear previous timeout
+    if (clientSearchTimeoutRef.current) {
+      clearTimeout(clientSearchTimeoutRef.current);
+    }
+
+    // If search text is too short, clear options
     if (!searchText || searchText.length < 2) {
       setClientOptions([]);
+      setLoadingClients(false);
       return;
     }
 
+    // Set loading state
     setLoadingClients(true);
-    try {
-      const result: any = await clientService.search({
-        pageIndex: 0,
-        pageSize: 20,
-        example: {
-          personalData: {
-            name: searchText
-          }
-        }
-      });
-      
-      const options = result.content?.map((client: any) => ({
-        id: client.id,
-        name: client.client?.personalData?.displayName || client.client?.personalData?.name || 'Sem nome'
-      })) || [];
-      
-      setClientOptions(options);
-    } catch (error) {
-      console.error('Error searching clients:', error);
-    } finally {
-      setLoadingClients(false);
-    }
-  };
 
-  // Search employees
-  const handleSearchEmployees = async (searchText: string) => {
+    // Debounce the search
+    clientSearchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const result: any = await clientService.search({
+          pageIndex: 0,
+          pageSize: 20,
+          example: {
+            personalData: {
+              name: searchText
+            }
+          }
+        });
+        
+        const options = result.content?.map((client: any) => ({
+          id: client.id,
+          name: client.client?.personalData?.displayName || client.client?.personalData?.name || 'Sem nome'
+        })) || [];
+        
+        setClientOptions(options);
+      } catch (error) {
+        console.error('Error searching clients:', error);
+        toast.error('Erro ao buscar clientes');
+      } finally {
+        setLoadingClients(false);
+      }
+    }, 500); // 500ms debounce delay
+  }, []);
+
+  // Search employees with debouncing
+  const handleSearchEmployees = useCallback((searchText: string) => {
+    // Clear previous timeout
+    if (employeeSearchTimeoutRef.current) {
+      clearTimeout(employeeSearchTimeoutRef.current);
+    }
+
+    // If search text is too short, clear options
     if (!searchText || searchText.length < 2) {
       setEmployeeOptions([]);
+      setLoadingEmployees(false);
       return;
     }
 
+    // Set loading state
     setLoadingEmployees(true);
-    try {
-      const result: any = await employeeService.search({
-        pageIndex: 0,
-        pageSize: 20,
-        example: {
-          personalData: {
-            name: searchText
+
+    // Debounce the search
+    employeeSearchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const result: any = await employeeService.search({
+          pageIndex: 0,
+          pageSize: 20,
+          example: {
+            personalData: {
+              name: searchText
+            }
           }
-        }
-      });
-      
-      const options = result.content?.map((emp: any) => ({
-        id: emp.id,
-        name: emp.personalData?.displayName || emp.personalData?.name || 'Sem nome'
-      })) || [];
-      
-      setEmployeeOptions(options);
-    } catch (error) {
-      console.error('Error searching employees:', error);
-    } finally {
-      setLoadingEmployees(false);
-    }
-  };
+        });
+        
+        const options = result.content?.map((emp: any) => ({
+          id: emp.id,
+          name: emp.personalData?.displayName || emp.personalData?.name || 'Sem nome'
+        })) || [];
+        
+        setEmployeeOptions(options);
+      } catch (error) {
+        console.error('Error searching employees:', error);
+        toast.error('Erro ao buscar colaboradores');
+      } finally {
+        setLoadingEmployees(false);
+      }
+    }, 500); // 500ms debounce delay
+  }, []);
 
   // Handle employee selection
   const handleEmployeeSelect = (employee: EmployeeOption) => {
@@ -302,6 +344,32 @@ export const CasoForm: React.FC = () => {
   }
 
   return (
+    <Box>
+      {/* Custom Breadcrumb for Form */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+          {isEditMode ? 'Editar Caso' : 'Novo Caso'}
+        </h2>
+
+        <nav>
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link className="font-medium" to="/">
+                Dashboard /
+              </Link>
+            </li>
+            <li>
+              <Link className="font-medium" to="/casos">
+                Casos /
+              </Link>
+            </li>
+            <li className="font-medium text-primary">
+              {isEditMode ? 'Editar' : 'Novo'}
+            </li>
+          </ol>
+        </nav>
+      </div>
+
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
         <h3 className="font-medium text-black dark:text-white">
@@ -360,11 +428,13 @@ export const CasoForm: React.FC = () => {
             isOptionEqualToValue={(option, value) => option.id === value.id}
             loading={loadingClients}
             disabled={submitting}
+            noOptionsText={loadingClients ? 'Buscando...' : 'Digite pelo menos 2 caracteres para buscar'}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Clientes"
                 placeholder="Digite para buscar clientes..."
+                helperText="Digite pelo menos 2 caracteres para buscar"
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -401,11 +471,13 @@ export const CasoForm: React.FC = () => {
               getOptionLabel={(option) => option.name}
               loading={loadingEmployees}
               disabled={submitting}
+              noOptionsText={loadingEmployees ? 'Buscando...' : 'Digite pelo menos 2 caracteres para buscar'}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Adicionar Colaboradores"
                   placeholder="Digite para buscar colaboradores..."
+                  helperText="Digite pelo menos 2 caracteres para buscar"
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -495,5 +567,6 @@ export const CasoForm: React.FC = () => {
         </Stack>
       </form>
     </div>
+    </Box>
   );
 };
