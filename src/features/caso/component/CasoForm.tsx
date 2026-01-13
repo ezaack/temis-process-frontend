@@ -47,6 +47,7 @@ export const CasoForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Form fields
   const [title, setTitle] = useState('');
@@ -143,9 +144,11 @@ export const CasoForm: React.FC = () => {
       );
       setSelectedEmployees(employees);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading caso:', error);
-      toast.error('Erro ao carregar caso');
+      const errorMessage = error.response?.data?.message || 'Erro ao carregar caso';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -187,9 +190,11 @@ export const CasoForm: React.FC = () => {
         })) || [];
         
         setClientOptions(options);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error searching clients:', error);
-        toast.error('Erro ao buscar clientes');
+        const errorMessage = error.response?.data?.message || 'Erro ao buscar clientes';
+        toast.error(errorMessage);
+        setClientOptions([]);
       } finally {
         setLoadingClients(false);
       }
@@ -232,9 +237,11 @@ export const CasoForm: React.FC = () => {
         })) || [];
         
         setEmployeeOptions(options);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error searching employees:', error);
-        toast.error('Erro ao buscar colaboradores');
+        const errorMessage = error.response?.data?.message || 'Erro ao buscar colaboradores';
+        toast.error(errorMessage);
+        setEmployeeOptions([]);
       } finally {
         setLoadingEmployees(false);
       }
@@ -338,7 +345,37 @@ export const CasoForm: React.FC = () => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+        <Box textAlign="center">
+          <CircularProgress />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            Carregando caso...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+            Erro ao Carregar
+          </h2>
+        </div>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="error" gutterBottom>
+            ⚠️ {error}
+          </Typography>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button variant="outlined" onClick={() => navigate('/casos')}>
+              Voltar para Lista
+            </Button>
+            <Button variant="contained" onClick={() => window.location.reload()}>
+              Tentar Novamente
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     );
   }

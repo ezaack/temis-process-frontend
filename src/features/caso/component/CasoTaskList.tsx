@@ -40,6 +40,7 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
   const [tasks, setTasks] = useState<TarefaResource[]>([]);
   const [statuses, setStatuses] = useState<StatusTarefaResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
 
@@ -56,6 +57,7 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
 
     try {
       setLoading(true);
+      setError(null);
       // Fetch tasks
       const tasksData = await tarefaService.getTarefasByCaso(groupId, casoId);
       setTasks(tasksData);
@@ -66,9 +68,11 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
         casoId
       );
       setStatuses(quadroData.statusTarefas || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tasks:', error);
-      toast.error('Erro ao carregar tarefas');
+      const errorMessage = error.response?.data?.message || 'Erro ao carregar tarefas';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,9 +90,12 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
           task.id === taskId ? { ...task, statusId: newStatusId } : task
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating status:', error);
-      toast.error('Erro ao atualizar status');
+      const errorMessage = error.response?.data?.message || 'Erro ao atualizar status';
+      toast.error(errorMessage);
+      // Revert on error
+      fetchData();
     }
   };
 
@@ -111,9 +118,11 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
       );
       toast.success('Título atualizado com sucesso');
       setEditingTaskId(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating title:', error);
-      toast.error('Erro ao atualizar título');
+      const errorMessage = error.response?.data?.message || 'Erro ao atualizar título';
+      toast.error(errorMessage);
+      setEditingTaskId(null);
     }
   };
 
@@ -145,7 +154,28 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
   if (loading) {
     return (
       <Box className="p-4">
-        <Skeleton variant="rectangular" height={400} />
+        <Box className="flex items-center justify-center py-8">
+          <Box className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent mx-auto mb-4"></div>
+            <Typography color="textSecondary">Carregando tarefas...</Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="p-8 text-center">
+        <Typography variant="h6" color="error" gutterBottom>
+          ⚠️ {error}
+        </Typography>
+        <button
+          onClick={fetchData}
+          className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-center font-medium text-white hover:bg-opacity-90"
+        >
+          🔄 Tentar Novamente
+        </button>
       </Box>
     );
   }
@@ -153,8 +183,12 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
   if (tasks.length === 0) {
     return (
       <Box className="p-8 text-center">
-        <Typography variant="h6" color="textSecondary">
+        <div className="text-5xl mb-4">📝</div>
+        <Typography variant="h6" color="textSecondary" gutterBottom>
           Nenhuma tarefa encontrada
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          Adicione tarefas usando o quadro Kanban para começar.
         </Typography>
       </Box>
     );

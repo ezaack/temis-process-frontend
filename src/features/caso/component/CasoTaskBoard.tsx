@@ -290,8 +290,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
   const [board, setBoard] = useState<QuadroTarefasResource | null>(null);
   const [tasks, setTasks] = useState<TarefaResource[]>([]);
   const [tasksByStatus, setTasksByStatus] = useState<TasksByStatus>({});
-  const [loading, setLoading] = useState(true);
-  const [activeTask, setActiveTask] = useState<TarefaResource | null>(null);
+  const [loading, setLoading] = useState(true);  const [error, setError] = useState<string | null>(null);  const [activeTask, setActiveTask] = useState<TarefaResource | null>(null);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTaskStatusId, setNewTaskStatusId] = useState<string>('');
 
@@ -311,6 +310,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
 
     setLoading(true);
     try {
+      setError(null);
       const [boardData, tasksData] = await Promise.all([
         quadroService.getQuadroTarefasByCaso(user.userData.officeGroupId, casoId),
         tarefaService.getTarefasByCaso(user.userData.officeGroupId, casoId),
@@ -319,9 +319,11 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       setBoard(boardData);
       setTasks(tasksData);
       groupTasksByStatus(tasksData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading board and tasks:', error);
-      fireToast('error', 'Failed to load task board');
+      const errorMessage = error.response?.data?.message || 'Falha ao carregar quadro de tarefas';
+      setError(errorMessage);
+      fireToast('error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -509,7 +511,27 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading task board...</div>
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent mx-auto mb-4"></div>
+          <div className="text-gray-600">Carregando quadro de tarefas...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <p className="text-red-600 font-semibold mb-2">{error}</p>
+          <button
+            onClick={() => loadBoardAndTasks()}
+            className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-center font-medium text-white hover:bg-opacity-90"
+          >
+            🔄 Tentar Novamente
+          </button>
+        </div>
       </div>
     );
   }
@@ -518,10 +540,17 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">No task board found for this case.</p>
-          <p className="text-sm text-gray-500">
-            A task board should be created automatically with the case.
+          <div className="text-5xl mb-4">📋</div>
+          <p className="text-gray-600 font-semibold mb-2">Nenhum quadro de tarefas encontrado</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Um quadro de tarefas deve ser criado automaticamente com o caso.
           </p>
+          <button
+            onClick={() => loadBoardAndTasks()}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-center font-medium text-white hover:bg-opacity-90"
+          >
+            🔄 Recarregar
+          </button>
         </div>
       </div>
     );

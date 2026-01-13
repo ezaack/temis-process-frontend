@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -48,6 +49,7 @@ export const Casos: React.FC = () => {
   const navigate = useNavigate();
   const [casos, setCasos] = useState<CasoDetailResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     title: '',
     clientId: '',
@@ -59,16 +61,18 @@ export const Casos: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [casoToDelete, setCasoToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCasos = async () => {
     if (!loggedInUser?.userData?.officeGroupId) {
-      console.log('No user or officeGroupId available');
+      setError('Usuário não autenticado ou sem grupo de escritório');
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
+      setError(null);
       const response = await casoService.searchCasos(
         loggedInUser.userData.officeGroupId,
         {
@@ -83,9 +87,13 @@ export const Casos: React.FC = () => {
 
       setCasos(response.content || []);
       setTotalCount(response.totalElements || 0);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching casos:', error);
-      toast.error('Erro ao carregar casos');
+      const errorMessage = error.response?.data?.message || 'Erro ao carregar casos';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setCasos([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -104,19 +112,26 @@ export const Casos: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (casoToDelete && loggedInUser?.userData?.officeGroupId) {
       try {
+        setDeleting(true);
         await casoService.deleteCaso(
           loggedInUser.userData.officeGroupId,
           casoToDelete
         );
         toast.success('Caso excluído com sucesso');
+        setDeleteDialogOpen(false);
+        setCasoToDelete(null);
         fetchCasos();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting caso:', error);
-        toast.error('Erro ao excluir caso');
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir caso';
+        toast.error(errorMessage);
+      } finally {
+        setDeleting(false);
       }
+    } else {
+      setDeleteDialogOpen(false);
+      setCasoToDelete(null);
     }
-    setDeleteDialogOpen(false);
-    setCasoToDelete(null);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -222,6 +237,24 @@ export const Casos: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Error State */}
+      {error && !loading && (
+        <Paper sx={{ mb: 3, p: 3, bgcolor: 'error.lighter' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography color="error" variant="body1">
+              ⚠️ {error}
+            </Typography>
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={fetchCasos}
+            >
+              Tentar Novamente
+            </Button>
+          </Box>
+        </Paper>
+      )}
+
       {/* Casos Table */}
       <TableContainer component={Paper}>
         <Table>
@@ -263,10 +296,22 @@ export const Casos: React.FC = () => {
             ) : casos.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  <Box sx={{ py: 3 }}>
-                    <Typography color="text.secondary">
-                      Nenhum caso encontrado
+                  <Box sx={{ py: 8 }}>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      📋 Nenhum caso encontrado
                     </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {Object.values(filters).some(f => f) 
+                        ? 'Tente ajustar os filtros de busca ou criar um novo caso.'
+                        : 'Comece criando seu primeiro caso.'}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => navigate('/caso-form')}
+                    >
+                      Criar Primeiro Caso
+                    </Button>
                   </Box>
                 </TableCell>
               </TableRow>
@@ -365,16 +410,30 @@ export const Casos: React.FC = () => {
       </TableContainer>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => !deleting && setDeleteDialogOpen(false)}
+      >
         <DialogTitle>Confirmar Exclusão</DialogTitle>
         <DialogContent>
           Tem certeza que deseja excluir este caso? Esta ação não pode ser
           desfeita.
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Excluir
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={deleting}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress size={16} /> : null}
+          >
+            {deleting ? 'Excluindo...' : 'Excluir'}
           </Button>
         </DialogActions>
       </Dialog>
