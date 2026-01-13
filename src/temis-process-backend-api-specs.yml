@@ -262,7 +262,7 @@ paths:
     delete:
       tags:
       - unidade-controller
-      operationId: delete_1
+      operationId: delete_2
       parameters:
       - name: groupId
         in: path
@@ -332,30 +332,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ColaboradorResponse"
-    delete:
-      tags:
-      - colaborador-controller
-      operationId: delete_2
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: id
-        in: query
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: boolean
   /v0/office-group/{groupId}/clients:
     put:
       tags:
@@ -1121,6 +1097,33 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/QuadroTarefasResource"
+  /v0/office-group/{groupId}/office-unit/{unitId}/employee:
+    get:
+      tags:
+      - colaborador-controller
+      operationId: listEmployeesByUnit
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: unitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ColaboradorResponse"
   /v0/office-group/{groupId}/office-unit/{id}:
     get:
       tags:
@@ -1196,6 +1199,31 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ClientResponse"
+  /v0/office-group/{groupId}:
+    delete:
+      tags:
+      - colaborador-controller
+      operationId: delete_1
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
 components:
   schemas:
     OfficeGroupResource:
@@ -1881,10 +1909,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
     CriarColaboradorRequest:
@@ -1930,10 +1958,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
     ClientCreateRequest:
@@ -1986,10 +2014,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
     CasoResource:
@@ -2058,10 +2086,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
     PagedFilterOfficeGroupResource:
@@ -2085,10 +2113,10 @@ components:
         pageSize:
           type: integer
           format: int32
-        numberOfPages:
+        currentPageIndex:
           type: integer
           format: int32
-        currentPageIndex:
+        numberOfPages:
           type: integer
           format: int32
     SignUpDataResource:

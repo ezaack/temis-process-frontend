@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   TextField,
@@ -27,6 +27,7 @@ import { loggedInUser } from '../../auth/api/authService';
 interface ClientOption {
   id: string;
   name: string;
+  officeUnitId?: string; // Add this field for filtering
 }
 
 interface EmployeeOption {
@@ -57,14 +58,9 @@ export const CasoForm: React.FC = () => {
   const [selectedEmployees, setSelectedEmployees] = useState<EmployeeWithPermissions[]>([]);
   
   // Autocomplete options
-  const [clientOptions, setClientOptions] = useState<ClientOption[]>([]);
-  const [employeeOptions, setEmployeeOptions] = useState<EmployeeOption[]>([]);
-  const [loadingClients, setLoadingClients] = useState(false);
-  const [loadingEmployees, setLoadingEmployees] = useState(false);
-
-  // Debounce refs
-  const clientSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const employeeSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [allClients, setAllClients] = useState<ClientOption[]>([]);
+  const [allEmployees, setAllEmployees] = useState<EmployeeOption[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
 
   // Fetch available office units (from user context)
   const availableOfficeUnits = loggedInUser?.userData.officeUnits || [];
@@ -75,18 +71,6 @@ export const CasoForm: React.FC = () => {
       loadCaso();
     }
   }, [isEditMode, id]);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (clientSearchTimeoutRef.current) {
-        clearTimeout(clientSearchTimeoutRef.current);
-      }
-      if (employeeSearchTimeoutRef.current) {
-        clearTimeout(employeeSearchTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const loadCaso = async () => {
     if (!id) return;
@@ -154,99 +138,103 @@ export const CasoForm: React.FC = () => {
     }
   };
 
-  // Search clients with debouncing
-  const handleSearchClients = useCallback((searchText: string) => {
-    // Clear previous timeout
-    if (clientSearchTimeoutRef.current) {
-      clearTimeout(clientSearchTimeoutRef.current);
-    }
-
-    // If search text is too short, clear options
-    if (!searchText || searchText.length < 2) {
-      setClientOptions([]);
-      setLoadingClients(false);
+  const fetchClientsForUnit = async (unitId: string) => {
+    if (!unitId) {
+      setAllClients([]);
       return;
     }
-
-    // Set loading state
-    setLoadingClients(true);
-
-    // Debounce the search
-    clientSearchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const result: any = await clientService.search({
-          pageIndex: 0,
-          pageSize: 20,
-          example: {
-            personalData: {
-              name: searchText
-            }
-          }
-        });
-        
-        const options = result.content?.map((client: any) => ({
-          id: client.id,
-          name: client.client?.personalData?.displayName || client.client?.personalData?.name || 'Sem nome'
-        })) || [];
-        
-        setClientOptions(options);
-      } catch (error: any) {
-        console.error('Error searching clients:', error);
-        const errorMessage = error.response?.data?.message || 'Erro ao buscar clientes';
-        toast.error(errorMessage);
-        setClientOptions([]);
-      } finally {
-        setLoadingClients(false);
-      }
-    }, 500); // 500ms debounce delay
-  }, []);
-
-  // Search employees with debouncing
-  const handleSearchEmployees = useCallback((searchText: string) => {
-    // Clear previous timeout
-    if (employeeSearchTimeoutRef.current) {
-      clearTimeout(employeeSearchTimeoutRef.current);
+    
+    setLoadingData(true);
+    try {
+      // Fetch all clients with large page size
+      const result: any = await clientService.search({
+        pageIndex: 0,
+        pageSize: 1000, // Fetch all in one page
+        example: {}
+      });
+      
+      // Transform to ClientOption format
+      const clients: ClientOption[] = result.content?.map((client: any) => ({
+        id: client.id,
+        name: client.client?.personalData?.displayName || 
+              client.client?.personalData?.name || 
+              'Sem nome',
+        officeUnitId: client.client?.officeUnitId
+      })) || [];
+      
+      // Filter by selected office unit in memory
+      const filteredClients = clients.filter(c => c.officeUnitId === unitId);
+      setAllClients(filteredClients);
+    } catch (error: any) {
+      console.error('Error fetching clients:', error);
+      toast.error('Erro ao carregar clientes');
+      setAllClients([]);
+    } finally {
+      setLoadingData(false);
     }
+  };
 
-    // If search text is too short, clear options
-    if (!searchText || searchText.length < 2) {
-      setEmployeeOptions([]);
-      setLoadingEmployees(false);
+  const fetchEmployeesForUnit = async (unitId: string) => {
+    if (!unitId) {
+      setAllEmployees([]);
       return;
     }
+    
+    setLoadingData(true);
+    try {
+      const employees = await employeeService.listEmployeesByUnit(unitId);
+      
+      // Transform to EmployeeOption format
+      const options: EmployeeOption[] = employees.map((emp: any) => ({
+        id: emp.id,
+        name: emp.employee?.personalData?.displayName || 
+              emp.employee?.personalData?.name || 
+              'Sem nome'
+      }));
+      
+      setAllEmployees(options);
+    } catch (error: any) {
+      console.error('Error fetching employees:', error);
+      toast.error('Erro ao carregar colaboradores');
+      setAllEmployees([]);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
-    // Set loading state
-    setLoadingEmployees(true);
+  // Filter clients based on search input
+  const filterClients = (searchText: string): ClientOption[] => {
+    if (!searchText || searchText.length < 2) {
+      return allClients;
+    }
+    
+    const lowerSearch = searchText.toLowerCase();
+    return allClients.filter(client => 
+      client.name.toLowerCase().includes(lowerSearch)
+    );
+  };
 
-    // Debounce the search
-    employeeSearchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const result: any = await employeeService.search({
-          pageIndex: 0,
-          pageSize: 20,
-          example: {
-            personalData: {
-              name: searchText
-            }
-          }
-        });
-        
-        const options = result.content?.map((emp: any) => ({
-          id: emp.id,
-          name: emp.personalData?.displayName || emp.personalData?.name || 'Sem nome'
-        })) || [];
-        
-        setEmployeeOptions(options);
-      } catch (error: any) {
-        console.error('Error searching employees:', error);
-        const errorMessage = error.response?.data?.message || 'Erro ao buscar colaboradores';
-        toast.error(errorMessage);
-        setEmployeeOptions([]);
-      } finally {
-        setLoadingEmployees(false);
-      }
-    }, 500); // 500ms debounce delay
-  }, []);
+  // Filter employees based on search input
+  const filterEmployees = (searchText: string): EmployeeOption[] => {
+    if (!searchText || searchText.length < 2) {
+      return allEmployees;
+    }
+    
+    const lowerSearch = searchText.toLowerCase();
+    return allEmployees.filter(emp => 
+      emp.name.toLowerCase().includes(lowerSearch)
+    );
+  };
+
+  useEffect(() => {
+    if (officeUnitId) {
+      fetchClientsForUnit(officeUnitId);
+      fetchEmployeesForUnit(officeUnitId);
+    } else {
+      setAllClients([]);
+      setAllEmployees([]);
+    }
+  }, [officeUnitId]);
 
   // Handle employee selection
   const handleEmployeeSelect = (employee: EmployeeOption) => {
@@ -457,29 +445,38 @@ export const CasoForm: React.FC = () => {
           {/* Clients */}
           <Autocomplete
             multiple
-            options={clientOptions}
+            options={allClients}
             value={selectedClients}
             onChange={(_, newValue) => setSelectedClients(newValue)}
-            onInputChange={(_, value) => handleSearchClients(value)}
+            filterOptions={(_, state) => {
+              return filterClients(state.inputValue);
+            }}
             getOptionLabel={(option) => option.name}
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            loading={loadingClients}
+            loading={loadingData}
             disabled={submitting}
-            noOptionsText={loadingClients ? 'Buscando...' : 'Digite pelo menos 2 caracteres para buscar'}
+            noOptionsText={
+              !officeUnitId 
+                ? 'Selecione uma unidade primeiro' 
+                : 'Nenhum cliente encontrado'
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Clientes"
-                placeholder="Digite para buscar clientes..."
-                helperText="Digite pelo menos 2 caracteres para buscar"
+                placeholder={
+                  !officeUnitId 
+                    ? 'Selecione uma unidade primeiro' 
+                    : 'Digite para filtrar clientes...'
+                }
+                helperText={
+                  !officeUnitId 
+                    ? 'Selecione uma unidade de escritório primeiro'
+                    : 'Digite para filtrar a lista'
+                }
                 InputProps={{
                   ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loadingClients ? <CircularProgress size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
+                  endAdornment: params.InputProps.endAdornment,
                 }}
               />
             )}
@@ -497,8 +494,10 @@ export const CasoForm: React.FC = () => {
           {/* Employees */}
           <Box>
             <Autocomplete
-              options={employeeOptions}
-              onInputChange={(_, value) => handleSearchEmployees(value)}
+              options={allEmployees}
+              filterOptions={(_, state) => {
+                return filterEmployees(state.inputValue);
+              }}
               onChange={(_, value) => {
                 if (value) {
                   handleEmployeeSelect(value);
@@ -506,23 +505,30 @@ export const CasoForm: React.FC = () => {
                 }
               }}
               getOptionLabel={(option) => option.name}
-              loading={loadingEmployees}
-              disabled={submitting}
-              noOptionsText={loadingEmployees ? 'Buscando...' : 'Digite pelo menos 2 caracteres para buscar'}
+              loading={loadingData}
+              disabled={submitting || !officeUnitId}
+              noOptionsText={
+                !officeUnitId 
+                  ? 'Selecione uma unidade primeiro' 
+                  : 'Nenhum colaborador encontrado'
+              }
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Adicionar Colaboradores"
-                  placeholder="Digite para buscar colaboradores..."
-                  helperText="Digite pelo menos 2 caracteres para buscar"
+                  placeholder={
+                    !officeUnitId 
+                      ? 'Selecione uma unidade primeiro' 
+                      : 'Digite para filtrar colaboradores...'
+                  }
+                  helperText={
+                    !officeUnitId 
+                      ? 'Selecione uma unidade de escritório primeiro'
+                      : 'Digite para filtrar a lista'
+                  }
                   InputProps={{
                     ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingEmployees ? <CircularProgress size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
+                    endAdornment: params.InputProps.endAdornment,
                   }}
                 />
               )}
