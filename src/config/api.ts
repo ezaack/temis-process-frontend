@@ -34,21 +34,7 @@ export const setAuthTokenGetter = (getter: () => string | null) => {
 // Request interceptor - Add auth token to requests
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Try to get token from sessionStorage first
-    const userStr = sessionStorage.getItem('loggedInUser');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (user?.accessToken) {
-          config.headers.Authorization = user.accessToken;
-          return config;
-        }
-      } catch (error) {
-        console.error('Error parsing user from sessionStorage:', error);
-      }
-    }
-
-    // Fallback: Use the token getter function if provided
+    // Use the token getter function if provided
     if (getAuthToken) {
       const token = getAuthToken();
       if (token) {

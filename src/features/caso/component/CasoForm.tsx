@@ -27,7 +27,7 @@ import { loggedInUser } from '../../auth/api/authService';
 interface ClientOption {
   id: string;
   name: string;
-  officeUnitId?: string; // Add this field for filtering
+  officeUnitId?: string; // Optional: for debugging only, not used in filtering
 }
 
 interface EmployeeOption {
@@ -146,11 +146,13 @@ export const CasoForm: React.FC = () => {
     
     setLoadingData(true);
     try {
-      // Fetch all clients with large page size
+      // Fetch clients filtered by officeUnitId server-side
       const result: any = await clientService.search({
         pageIndex: 0,
-        pageSize: 1000, // Fetch all in one page
-        example: {}
+        pageSize: 1000,
+        example: {
+          officeUnitId: unitId  // Server-side filter
+        }
       });
       
       // Transform to ClientOption format
@@ -159,12 +161,11 @@ export const CasoForm: React.FC = () => {
         name: client.client?.personalData?.displayName || 
               client.client?.personalData?.name || 
               'Sem nome',
-        officeUnitId: client.client?.officeUnitId
+        officeUnitId: client.client?.officeUnitId  // Keep for debugging
       })) || [];
       
-      // Filter by selected office unit in memory
-      const filteredClients = clients.filter(c => c.officeUnitId === unitId);
-      setAllClients(filteredClients);
+      // No in-memory filtering needed - API already filtered
+      setAllClients(clients);
     } catch (error: any) {
       console.error('Error fetching clients:', error);
       toast.error('Erro ao carregar clientes');
