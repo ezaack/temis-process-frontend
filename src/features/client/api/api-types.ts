@@ -1,4 +1,4 @@
-import { AddressType, ContactType, Country, PersonType, RepresentativeType } from "../../../components/shared/enums";
+import { AddressType, ContactType, Country, DocumentType, PersonType, RepresentativeType } from "../../../components/shared/enums";
 
 
 // API Resource Types

@@ -51,13 +51,13 @@ const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
 
   return (
     <div
-      className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-move hover:shadow-md transition-shadow ${
+      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-move hover:shadow-md transition-shadow touch-pan-y sm:p-4 ${
         isDragging ? 'opacity-50' : ''
       }`}
     >
-      <h4 className="font-medium text-gray-900 mb-2">{task.titulo}</h4>
+      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">{task.titulo}</h4>
       {task.descricao && (
-        <p className="text-sm text-gray-600 mb-2">{task.descricao}</p>
+        <p className="text-xs text-gray-600 mb-2 sm:text-sm">{task.descricao}</p>
       )}
       <div className="flex items-center gap-2 flex-wrap">
         {task.prioridade && (
@@ -112,16 +112,16 @@ const StatusColumn: React.FC<{
   onAddTask: (statusId: string) => void;
 }> = ({ status, tasks, onAddTask }) => {
   return (
-    <div className="bg-gray-50 rounded-lg p-4 min-w-[300px] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+    <div className="bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {status.cor && (
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: status.cor }}
             />
           )}
-          <h3 className="font-semibold text-gray-900">{status.nome}</h3>
+          <h3 className="text-sm font-semibold text-gray-900 sm:text-base">{status.nome}</h3>
           <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
             {tasks.length}
           </span>
@@ -567,7 +567,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 sm:gap-4 sm:-mx-0 sm:px-0">
           {sortedStatuses.map((status) => (
             <StatusColumn
               key={status.id}

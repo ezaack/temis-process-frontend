@@ -26,7 +26,7 @@ import EmployeeForm from './pages/employee/EmployeeFrom';
 import { Employees } from './pages/employee/Employees';
 import { Casos } from './features/caso/component/Casos';
 import { CasoForm } from './features/caso/component/CasoForm';
-import { CasoDetail } from './features/caso/component/CasoDetail';
+import { CasoView } from './features/caso/component/CasoView';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -222,7 +222,7 @@ function App() {
             <PrivateRoute>
               <>
                 <PageTitle title="Detalhes do Caso" />
-                <CasoDetail />
+                <CasoView />
               </>
             </PrivateRoute>
           }
