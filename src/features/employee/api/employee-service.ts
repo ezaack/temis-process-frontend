@@ -16,6 +16,13 @@ export const employeeService = {
     return response.data;
   },
 
+  listEmployeesByUnit: async (unitId: string) => {
+    const response = await apiClient.get(
+      `/office-group/${loggedInUser?.userData.officeGroupId}/office-unit/${unitId}/employee`
+    );
+    return response.data;
+  },
+
   delete: async (id: string) => {
     const response = await apiClient.delete(
       `/office-group/${loggedInUser?.userData.officeGroupId}/employee?id=${id}`

@@ -24,6 +24,9 @@ import PrivateRoute from './components/PrivateRoute';
 import { UserProvider } from './context/UserContext';
 import EmployeeForm from './pages/employee/EmployeeFrom';
 import { Employees } from './pages/employee/Employees';
+import { Casos } from './features/caso/component/Casos';
+import { CasoForm } from './features/caso/component/CasoForm';
+import { CasoDetail } from './features/caso/component/CasoDetail';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -177,6 +180,50 @@ function App() {
           element={
             <PrivateRoute>
               <ClientDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/casos"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Casos" />
+                <Casos />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/caso-form"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Novo Caso" />
+                <CasoForm />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/caso-form/:id"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Editar Caso" />
+                <CasoForm />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/casos/:id"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Detalhes do Caso" />
+                <CasoDetail />
+              </>
             </PrivateRoute>
           }
         />
