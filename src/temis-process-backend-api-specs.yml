@@ -507,36 +507,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TarefaResource"
-    post:
-      tags:
-      - tarefa-controller
-      operationId: createTarefa
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: statusId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TarefaResource"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status:
     post:
       tags:
@@ -999,7 +969,37 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TarefaResource"
-  /v0/office-group/{groupId}/tarefas/caso/{casoId}:
+  /v0/office-group/{groupId}/casos/{casoId}/tarefas:
+    post:
+      tags:
+      - tarefa-controller
+      operationId: createTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
     get:
       tags:
       - tarefa-controller

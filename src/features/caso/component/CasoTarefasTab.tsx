@@ -1,5 +1,6 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useRef, lazy, Suspense } from 'react';
 import useLocalStorage from '../../../hooks/useLocalStorage';
+import type { CasoTaskBoardHandle } from './CasoTaskBoard';
 
 // Lazy-load task views
 const CasoTaskBoard = lazy(() => import('./CasoTaskBoard').then(m => ({ default: m.CasoTaskBoard })));
@@ -28,13 +29,14 @@ const CasoTarefasTab: React.FC<CasoTarefasTabProps> = ({ casoId }) => {
     'board'
   );
 
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  // Ref to access CasoTaskBoard methods
+  const taskBoardRef = useRef<CasoTaskBoardHandle>(null);
 
   const handleCreateTask = () => {
-    setIsCreatingTask(true);
-    // TODO: Open task creation modal/form
-    // For now, just toggle the state
-    setTimeout(() => setIsCreatingTask(false), 100);
+    // Only works for board view
+    if (activeView === 'board' && taskBoardRef.current) {
+      taskBoardRef.current.openNewTaskModal();
+    }
   };
 
   return (
@@ -99,9 +101,10 @@ const CasoTarefasTab: React.FC<CasoTarefasTabProps> = ({ casoId }) => {
         {/* Nova Tarefa Button */}
         <button
           onClick={handleCreateTask}
-          disabled={isCreatingTask}
+          disabled={activeView !== 'board'}
           className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-2.5 text-center font-medium text-white hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Criar nova tarefa"
+          title={activeView !== 'board' ? 'Disponível apenas na visualização de quadro' : 'Criar nova tarefa'}
         >
           <svg
             className="fill-current"
@@ -134,7 +137,7 @@ const CasoTarefasTab: React.FC<CasoTarefasTabProps> = ({ casoId }) => {
         >
           {activeView === 'board' && (
             <div className="p-4 md:p-6">
-              <CasoTaskBoard casoId={casoId} />
+              <CasoTaskBoard ref={taskBoardRef} casoId={casoId} />
             </div>
           )}
           {activeView === 'list' && (

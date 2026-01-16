@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -22,7 +22,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { useUserContext } from '../../../context/UserContext';
 import { quadroService } from '../api/quadroService';
 import { tarefaService } from '../api/tarefaService';
-import { fireToast } from '../../../hooks/fireToast';
+import { useToast } from '../../../hooks/useToast';
 import type {
   QuadroTarefasResource,
   StatusTarefaResource,
@@ -109,8 +109,7 @@ const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
 const StatusColumn: React.FC<{
   status: StatusTarefaResource;
   tasks: TarefaResource[];
-  onAddTask: (statusId: string) => void;
-}> = ({ status, tasks, onAddTask }) => {
+}> = ({ status, tasks }) => {
   return (
     <div className="bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -126,13 +125,6 @@ const StatusColumn: React.FC<{
             {tasks.length}
           </span>
         </div>
-        <button
-          onClick={() => onAddTask(status.id!)}
-          className="text-gray-500 hover:text-gray-700 text-xl"
-          title="Add Task"
-        >
-          +
-        </button>
       </div>
 
       {status.descricao && (
@@ -165,11 +157,12 @@ const NewTaskModal: React.FC<{
   const [prazo, setPrazo] = useState('');
   const [estimativaHoras, setEstimativaHoras] = useState('');
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo.trim()) {
-      fireToast('error', 'Title is required');
+      toast.error('Erro', 'Title is required');
       return;
     }
 
@@ -284,9 +277,15 @@ const NewTaskModal: React.FC<{
   );
 };
 
+// Main Board Component Handle
+export interface CasoTaskBoardHandle {
+  openNewTaskModal: () => void;
+}
+
 // Main Board Component
-export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
+export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>(({ casoId }, ref) => {
   const { user } = useUserContext();
+  const toast = useToast();
   const [board, setBoard] = useState<QuadroTarefasResource | null>(null);
   const [tasks, setTasks] = useState<TarefaResource[]>([]);
   const [tasksByStatus, setTasksByStatus] = useState<TasksByStatus>({});
@@ -300,6 +299,19 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Expose method to open new task modal for first status (A fazer)
+  useImperativeHandle(ref, () => ({
+    openNewTaskModal: () => {
+      if (!board?.statusTarefas || board.statusTarefas.length === 0) {
+        toast.error('Erro', 'Nenhum status disponível para criar tarefa');
+        return;
+      }
+      // Find first status by ordem (should be "A fazer")
+      const firstStatus = [...board.statusTarefas].sort((a, b) => a.ordem - b.ordem)[0];
+      handleAddTask(firstStatus.id!);
+    },
+  }));
 
   useEffect(() => {
     loadBoardAndTasks();
@@ -323,7 +335,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       console.error('Error loading board and tasks:', error);
       const errorMessage = error.response?.data?.message || 'Falha ao carregar quadro de tarefas';
       setError(errorMessage);
-      fireToast('error', errorMessage);
+      toast.error('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -466,10 +478,10 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
         await loadBoardAndTasks();
       }
 
-      fireToast('success', 'Task updated successfully');
+      toast.success('Sucesso', 'Task updated successfully');
     } catch (error) {
       console.error('Error updating task:', error);
-      fireToast('error', 'Failed to update task');
+      toast.error('Erro', 'Failed to update task');
       // Reload to revert optimistic update
       await loadBoardAndTasks();
     }
@@ -487,6 +499,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
     if (!user?.userData?.officeGroupId) return;
 
     try {
+      // Include statusId in the body as per API spec
       const newTask: TarefaResource = {
         ...taskData,
         statusId,
@@ -495,15 +508,15 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
 
       await tarefaService.createTarefa(
         user.userData.officeGroupId,
-        statusId,
+        casoId,
         newTask
       );
 
-      fireToast('success', 'Task created successfully');
+      toast.success('Sucesso', 'Task created successfully');
       await loadBoardAndTasks();
     } catch (error) {
       console.error('Error creating task:', error);
-      fireToast('error', 'Failed to create task');
+      toast.error('Erro', 'Failed to create task');
       throw error;
     }
   };
@@ -573,7 +586,6 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
               key={status.id}
               status={status}
               tasks={tasksByStatus[status.id!] || []}
-              onAddTask={handleAddTask}
             />
           ))}
         </div>
@@ -592,4 +604,6 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       )}
     </div>
   );
-};
+});
+
+CasoTaskBoard.displayName = 'CasoTaskBoard';

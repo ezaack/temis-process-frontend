@@ -3,7 +3,7 @@ import type { TarefaResource } from './api-types';
 
 export const tarefaService = {
   getTarefasByCaso: async (groupId: string, casoId: string): Promise<TarefaResource[]> => {
-    const response = await apiClient.get(`/office-group/${groupId}/tarefas/caso/${casoId}`);
+    const response = await apiClient.get(`/office-group/${groupId}/casos/${casoId}/tarefas`);
     return response.data;
   },
 
@@ -12,8 +12,8 @@ export const tarefaService = {
     return response.data;
   },
 
-  createTarefa: async (groupId: string, statusId: string, data: TarefaResource): Promise<TarefaResource> => {
-    const response = await apiClient.post(`/office-group/${groupId}/tarefas/status/${statusId}`, data);
+  createTarefa: async (groupId: string, casoId: string, data: TarefaResource): Promise<TarefaResource> => {
+    const response = await apiClient.post(`/office-group/${groupId}/casos/${casoId}/tarefas`, data);
     return response.data;
   },
 
