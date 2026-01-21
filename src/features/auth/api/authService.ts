@@ -12,9 +12,6 @@ export const authService = {
     console.log('Login response:', response.data); // Debugging line
     loggedInUser = response.data;
 
-    // Save to sessionStorage for current session only
-    sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-
     console.log('loggedInUser:', loggedInUser); // Debugging line
     return loggedInUser; // Ensure this contains user data
   },

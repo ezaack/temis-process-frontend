@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -10,6 +10,7 @@ import {
   DragStartEvent,
   DragOverEvent,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -22,7 +23,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { useUserContext } from '../../../context/UserContext';
 import { quadroService } from '../api/quadroService';
 import { tarefaService } from '../api/tarefaService';
-import { fireToast } from '../../../hooks/fireToast';
+import { useToast } from '../../../hooks/useToast';
+import { TarefaViewModal } from './TarefaViewModal';
 import type {
   QuadroTarefasResource,
   StatusTarefaResource,
@@ -38,9 +40,18 @@ interface TasksByStatus {
 }
 
 // Task Card Component
-const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
+const TaskCard: React.FC<{ 
+  task: TarefaResource; 
+  isDragging?: boolean; 
+  dragListeners?: any;
+  onClick?: (taskId: string) => void;
+  isUpdating?: boolean;
+}> = ({
   task,
   isDragging = false,
+  dragListeners,
+  onClick,
+  isUpdating = false,
 }) => {
   const priorityColors = {
     BAIXA: 'bg-gray-100 text-gray-700',
@@ -49,15 +60,45 @@ const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
     URGENTE: 'bg-red-100 text-red-700',
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open modal when clicking interactive elements or dragging
+    if (isDragging || !task.id) return;
+    
+    // Check if click was on an interactive element or drag handle
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input') || target.closest('.drag-handle')) {
+      return;
+    }
+    
+    onClick?.(task.id);
+  };
+
   return (
     <div
-      className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-move hover:shadow-md transition-shadow ${
-        isDragging ? 'opacity-50' : ''
+      onClick={handleCardClick}
+      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-all duration-200 touch-pan-y sm:p-4 relative ${
+        isDragging ? 'opacity-50 rotate-2 scale-105 shadow-xl ring-2 ring-primary' : ''
       }`}
     >
-      <h4 className="font-medium text-gray-900 mb-2">{task.titulo}</h4>
+      {isUpdating && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 flex items-center justify-center rounded-lg z-10">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
+      {dragListeners && (
+        <div 
+          {...dragListeners} 
+          className="drag-handle absolute top-2 right-2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+          title="Drag to reorder"
+        >
+          <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+          </svg>
+        </div>
+      )}
+      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base pr-8">{task.titulo}</h4>
       {task.descricao && (
-        <p className="text-sm text-gray-600 mb-2">{task.descricao}</p>
+        <p className="text-xs text-gray-600 mb-2 sm:text-sm">{task.descricao}</p>
       )}
       <div className="flex items-center gap-2 flex-wrap">
         {task.prioridade && (
@@ -83,7 +124,11 @@ const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
 };
 
 // Sortable Task Card Component
-const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
+const SortableTaskCard: React.FC<{ 
+  task: TarefaResource; 
+  onClick?: (taskId: string) => void;
+  isUpdating?: boolean;
+}> = ({ task, onClick, isUpdating }) => {
   const {
     attributes,
     listeners,
@@ -99,8 +144,14 @@ const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskCard task={task} isDragging={isDragging} />
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <TaskCard 
+        task={task} 
+        isDragging={isDragging} 
+        dragListeners={listeners}
+        onClick={onClick}
+        isUpdating={isUpdating}
+      />
     </div>
   );
 };
@@ -109,30 +160,31 @@ const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
 const StatusColumn: React.FC<{
   status: StatusTarefaResource;
   tasks: TarefaResource[];
-  onAddTask: (statusId: string) => void;
-}> = ({ status, tasks, onAddTask }) => {
+  onTaskClick?: (taskId: string) => void;
+  updatingTaskIds?: Set<string>;
+}> = ({ status, tasks, onTaskClick, updatingTaskIds }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: status.id! });
+
   return (
-    <div className="bg-gray-50 rounded-lg p-4 min-w-[300px] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+    <div
+      ref={setNodeRef}
+      className={`bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4 transition-all duration-200 ${
+        isOver ? 'ring-2 ring-primary bg-primary/5 shadow-lg' : ''
+      }`}
+    >
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {status.cor && (
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: status.cor }}
             />
           )}
-          <h3 className="font-semibold text-gray-900">{status.nome}</h3>
+          <h3 className="text-sm font-semibold text-gray-900 sm:text-base">{status.nome}</h3>
           <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
             {tasks.length}
           </span>
         </div>
-        <button
-          onClick={() => onAddTask(status.id!)}
-          className="text-gray-500 hover:text-gray-700 text-xl"
-          title="Add Task"
-        >
-          +
-        </button>
       </div>
 
       {status.descricao && (
@@ -145,7 +197,12 @@ const StatusColumn: React.FC<{
       >
         <div className="flex-1 space-y-2 overflow-y-auto max-h-[calc(100vh-300px)]">
           {tasks.map((task) => (
-            <SortableTaskCard key={task.id} task={task} />
+            <SortableTaskCard 
+              key={task.id} 
+              task={task} 
+              onClick={onTaskClick}
+              isUpdating={updatingTaskIds?.has(task.id!)}
+            />
           ))}
         </div>
       </SortableContext>
@@ -165,11 +222,12 @@ const NewTaskModal: React.FC<{
   const [prazo, setPrazo] = useState('');
   const [estimativaHoras, setEstimativaHoras] = useState('');
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo.trim()) {
-      fireToast('error', 'Title is required');
+      toast.error('Erro', 'Title is required');
       return;
     }
 
@@ -284,15 +342,24 @@ const NewTaskModal: React.FC<{
   );
 };
 
+// Main Board Component Handle
+export interface CasoTaskBoardHandle {
+  openNewTaskModal: () => void;
+}
+
 // Main Board Component
-export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
+export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>(({ casoId }, ref) => {
   const { user } = useUserContext();
+  const toast = useToast();
   const [board, setBoard] = useState<QuadroTarefasResource | null>(null);
   const [tasks, setTasks] = useState<TarefaResource[]>([]);
   const [tasksByStatus, setTasksByStatus] = useState<TasksByStatus>({});
   const [loading, setLoading] = useState(true);  const [error, setError] = useState<string | null>(null);  const [activeTask, setActiveTask] = useState<TarefaResource | null>(null);
+  const [updatingTaskIds, setUpdatingTaskIds] = useState<Set<string>>(new Set());
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTaskStatusId, setNewTaskStatusId] = useState<string>('');
+  const [selectedTarefaId, setSelectedTarefaId] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -300,6 +367,19 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Expose method to open new task modal for first status (A fazer)
+  useImperativeHandle(ref, () => ({
+    openNewTaskModal: () => {
+      if (!board?.statusTarefas || board.statusTarefas.length === 0) {
+        toast.error('Erro', 'Nenhum status disponível para criar tarefa');
+        return;
+      }
+      // Find first status by ordem (should be "A fazer")
+      const firstStatus = [...board.statusTarefas].sort((a, b) => a.ordem - b.ordem)[0];
+      handleAddTask(firstStatus.id!);
+    },
+  }));
 
   useEffect(() => {
     loadBoardAndTasks();
@@ -323,7 +403,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
       console.error('Error loading board and tasks:', error);
       const errorMessage = error.response?.data?.message || 'Falha ao carregar quadro de tarefas';
       setError(errorMessage);
-      fireToast('error', errorMessage);
+      toast.error('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -353,67 +433,35 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id as string;
-    const overId = over.id as string;
-
-    // Find which status columns the active and over items belong to
-    const activeTask = tasks.find((t) => t.id === activeId);
-    if (!activeTask) return;
-
-    let overStatusId = '';
-    
-    // Check if over a task
-    const overTask = tasks.find((t) => t.id === overId);
-    if (overTask) {
-      overStatusId = overTask.statusId;
-    } else {
-      // Check if over a status column (for empty columns)
-      overStatusId = overId;
-    }
-
-    const activeStatusId = activeTask.statusId;
-
-    if (activeStatusId !== overStatusId) {
-      // Moving between columns - update local state optimistically
-      setTasksByStatus((prev) => {
-        const activeItems = prev[activeStatusId] || [];
-        const overItems = prev[overStatusId] || [];
-
-        const activeIndex = activeItems.findIndex((t) => t.id === activeId);
-        const overIndex = overTask
-          ? overItems.findIndex((t) => t.id === overId)
-          : overItems.length;
-
-        const newActiveItems = activeItems.filter((t) => t.id !== activeId);
-        const movedTask = { ...activeTask, statusId: overStatusId };
-        const newOverItems = [...overItems];
-        newOverItems.splice(overIndex, 0, movedTask);
-
-        return {
-          ...prev,
-          [activeStatusId]: newActiveItems,
-          [overStatusId]: newOverItems,
-        };
-      });
-    }
+    // Visual feedback only - actual state update happens in handleDragEnd
+    // This prevents duplicate key issues during drag operations
+    return;
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
 
-    if (!over || !user?.userData?.officeGroupId) return;
+    if (!over || !user?.userData?.officeGroupId) {
+      console.log('[DragEnd] Early return - over:', !!over, 'groupId:', !!user?.userData?.officeGroupId);
+      return;
+    }
 
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    if (activeId === overId) return;
+    console.log('[DragEnd] activeId:', activeId, 'overId:', overId);
+
+    if (activeId === overId) {
+      console.log('[DragEnd] Same item, no move needed');
+      return;
+    }
 
     const activeTask = tasks.find((t) => t.id === activeId);
-    if (!activeTask) return;
+    if (!activeTask) {
+      console.log('[DragEnd] Active task not found:', activeId);
+      return;
+    }
 
     let overStatusId = '';
     const overTask = tasks.find((t) => t.id === overId);
@@ -426,12 +474,25 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
 
     const activeStatusId = activeTask.statusId;
 
+    console.log('[DragEnd] Move details:', {
+      taskId: activeId,
+      fromStatus: activeStatusId,
+      toStatus: overStatusId,
+      sameColumn: activeStatusId === overStatusId
+    });
+
+    // Set loading state for this task
+    setUpdatingTaskIds(prev => new Set(prev).add(activeId));
+
     try {
       if (activeStatusId === overStatusId) {
         // Reordering within the same column
+        console.log('[DragEnd] Reordering within same column');
         const items = tasksByStatus[activeStatusId] || [];
         const oldIndex = items.findIndex((t) => t.id === activeId);
         const newIndex = items.findIndex((t) => t.id === overId);
+
+        console.log('[DragEnd] Reorder indices - old:', oldIndex, 'new:', newIndex);
 
         if (oldIndex !== newIndex) {
           const reorderedItems = arrayMove(items, oldIndex, newIndex);
@@ -442,36 +503,58 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
           }));
 
           // Update ordem on the server
-          await tarefaService.reorderTarefa(
+          console.log('[DragEnd] Calling updateTarefa API for reorder:', { activeId, newIndex });
+          const result = await tarefaService.updateTarefa(
             user.userData.officeGroupId,
             activeId,
-            newIndex
+            { ordem: newIndex }
           );
+          console.log('[DragEnd] updateTarefa response:', result);
+          
+          // Reload to ensure consistency with server
+          console.log('[DragEnd] Reloading board after reorder');
+          await loadBoardAndTasks();
+        } else {
+          console.log('[DragEnd] No reorder needed, indices are the same');
         }
       } else {
         // Moving between columns
+        console.log('[DragEnd] Moving between columns');
         const overItems = tasksByStatus[overStatusId] || [];
         const newIndex = overTask
           ? overItems.findIndex((t) => t.id === overId)
           : overItems.length;
 
-        await tarefaService.moveTarefa(
+        console.log('[DragEnd] Calling updateTarefa API:', { activeId, overStatusId, newIndex });
+        const result = await tarefaService.updateTarefa(
           user.userData.officeGroupId,
           activeId,
-          overStatusId,
-          newIndex
+          { statusId: overStatusId, ordem: newIndex }
         );
+        console.log('[DragEnd] updateTarefa response:', result);
 
         // Refresh tasks to get updated data
+        console.log('[DragEnd] Reloading board and tasks');
         await loadBoardAndTasks();
       }
 
-      fireToast('success', 'Task updated successfully');
-    } catch (error) {
-      console.error('Error updating task:', error);
-      fireToast('error', 'Failed to update task');
+      console.log('[DragEnd] Update successful');
+      toast.success('Sucesso', 'Tarefa atualizada');
+    } catch (error: any) {
+      console.error('[DragEnd] Error updating task:', error);
+      console.error('[DragEnd] Error response:', error.response?.data);
+      const message = error.response?.data?.message || 'Falha ao atualizar tarefa';
+      toast.error('Erro', message);
       // Reload to revert optimistic update
+      console.log('[DragEnd] Reloading after error');
       await loadBoardAndTasks();
+    } finally {
+      setUpdatingTaskIds(prev => {
+        const next = new Set(prev);
+        next.delete(activeId);
+        return next;
+      });
+      console.log('[DragEnd] Complete');
     }
   };
 
@@ -487,6 +570,7 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
     if (!user?.userData?.officeGroupId) return;
 
     try {
+      // Include statusId in the body as per API spec
       const newTask: TarefaResource = {
         ...taskData,
         statusId,
@@ -495,17 +579,32 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
 
       await tarefaService.createTarefa(
         user.userData.officeGroupId,
-        statusId,
+        casoId,
         newTask
       );
 
-      fireToast('success', 'Task created successfully');
+      toast.success('Sucesso', 'Task created successfully');
       await loadBoardAndTasks();
     } catch (error) {
       console.error('Error creating task:', error);
-      fireToast('error', 'Failed to create task');
+      toast.error('Erro', 'Failed to create task');
       throw error;
     }
+  };
+
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTarefaId(taskId);
+    setShowViewModal(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setSelectedTarefaId(null);
+  };
+
+  const handleTaskUpdate = async () => {
+    // Refresh board after task update/delete
+    await loadBoardAndTasks();
   };
 
   if (loading) {
@@ -567,13 +666,14 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 sm:gap-4 sm:-mx-0 sm:px-0">
           {sortedStatuses.map((status) => (
             <StatusColumn
               key={status.id}
               status={status}
               tasks={tasksByStatus[status.id!] || []}
-              onAddTask={handleAddTask}
+              onTaskClick={handleTaskClick}
+              updatingTaskIds={updatingTaskIds}
             />
           ))}
         </div>
@@ -583,6 +683,13 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
         </DragOverlay>
       </DndContext>
 
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 5h12a1 1 0 011 1v8a1 1 0 01-1 1H2a1 1 0 01-1-1V6a1 1 0 011-1zm0-2h12v1H2V3z"/>
+        </svg>
+        <span>Dica: Arraste tarefas entre colunas ou use Tab + Espaço para mover pelo teclado</span>
+      </div>
+
       {showNewTaskModal && (
         <NewTaskModal
           statusId={newTaskStatusId}
@@ -590,6 +697,18 @@ export const CasoTaskBoard: React.FC<CasoTaskBoardProps> = ({ casoId }) => {
           onSubmit={handleCreateTask}
         />
       )}
+
+      {showViewModal && selectedTarefaId && (
+        <TarefaViewModal
+          tarefaId={selectedTarefaId}
+          casoId={casoId}
+          isOpen={showViewModal}
+          onClose={handleCloseViewModal}
+          onUpdate={handleTaskUpdate}
+        />
+      )}
     </div>
   );
-};
+});
+
+CasoTaskBoard.displayName = 'CasoTaskBoard';
