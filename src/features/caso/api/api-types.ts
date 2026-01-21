@@ -91,3 +91,30 @@ export interface TarefaResource {
   estimativaHoras?: number;
   prioridade?: PrioridadeTarefa;
 }
+
+// Extended task resource for detail view with additional metadata and relations
+export interface TarefaDetailResource extends TarefaResource {
+  watchers?: string[]; // Array of employee IDs watching this task
+  createdAt?: string; // ISO 8601 datetime
+  updatedAt?: string; // ISO 8601 datetime
+  createdBy?: string; // Employee ID who created the task
+  
+  // Populated related entities (when fetched with details)
+  caso?: {
+    id: string;
+    titulo: string;
+    numero?: string;
+  };
+  
+  colaborador?: {
+    id: string;
+    nome: string;
+    email: string;
+  };
+  
+  status?: {
+    id: string;
+    nome: string;
+    cor?: string;
+  };
+}

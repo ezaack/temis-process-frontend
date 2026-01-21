@@ -27,6 +27,7 @@ import { Employees } from './pages/employee/Employees';
 import { Casos } from './features/caso/component/Casos';
 import { CasoForm } from './features/caso/component/CasoForm';
 import { CasoView } from './features/caso/component/CasoView';
+import { TarefaView } from './features/caso/component/TarefaView';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -223,6 +224,17 @@ function App() {
               <>
                 <PageTitle title="Detalhes do Caso" />
                 <CasoView />
+              </>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/casos/:casoId/tarefas/:tarefaId"
+          element={
+            <PrivateRoute>
+              <>
+                <PageTitle title="Detalhes da Tarefa" />
+                <TarefaView />
               </>
             </PrivateRoute>
           }

@@ -26,6 +26,7 @@ import { toast } from 'react-toastify';
 import { useUserContext } from '../../../context/UserContext';
 import { tarefaService } from '../api/tarefaService';
 import { quadroService } from '../api/quadroService';
+import { TarefaViewModal } from './TarefaViewModal';
 import type {
   TarefaResource,
   StatusTarefaResource,
@@ -43,8 +44,36 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
   const [error, setError] = useState<string | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
+  const [selectedTarefaId, setSelectedTarefaId] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const groupId = user?.userData?.officeGroupId;
+
+  const handleRowClick = (taskId: string, e: React.MouseEvent) => {
+    // Don't open modal when clicking interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('.MuiSelect-root') ||
+      target.closest('input') ||
+      target.closest('.MuiIconButton-root')
+    ) {
+      return;
+    }
+    
+    setSelectedTarefaId(taskId);
+    setShowViewModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowViewModal(false);
+    setSelectedTarefaId(null);
+  };
+
+  const handleTaskUpdate = async () => {
+    // Refresh tasks after update/delete
+    await fetchData();
+  };
 
   useEffect(() => {
     if (groupId) {
@@ -195,8 +224,8 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
   }
 
   return (
-    <TableContainer component={Paper} className="shadow-md">
-      <Table>
+    <>
+    <TableContainer component={Paper} className="shadow-md">\n      <Table>
         <TableHead>
           <TableRow className="bg-gray-50">
             <TableCell>
@@ -224,7 +253,12 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
         </TableHead>
         <TableBody>
           {tasks.map((task) => (
-            <TableRow key={task.id} hover>
+            <TableRow 
+              key={task.id} 
+              hover 
+              onClick={(e) => handleRowClick(task.id!, e)}
+              sx={{ cursor: 'pointer' }}
+            >
               <TableCell>
                 {editingTaskId === task.id ? (
                   <TextField
@@ -314,5 +348,16 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
         </TableBody>
       </Table>
     </TableContainer>
+
+    {showViewModal && selectedTarefaId && (
+      <TarefaViewModal
+        tarefaId={selectedTarefaId}
+        casoId={casoId}
+        isOpen={showViewModal}
+        onClose={handleCloseModal}
+        onUpdate={handleTaskUpdate}
+      />
+    )}
+    </>
   );
 };

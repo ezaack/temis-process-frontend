@@ -23,6 +23,7 @@ import { useUserContext } from '../../../context/UserContext';
 import { quadroService } from '../api/quadroService';
 import { tarefaService } from '../api/tarefaService';
 import { useToast } from '../../../hooks/useToast';
+import { TarefaViewModal } from './TarefaViewModal';
 import type {
   QuadroTarefasResource,
   StatusTarefaResource,
@@ -38,9 +39,16 @@ interface TasksByStatus {
 }
 
 // Task Card Component
-const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
+const TaskCard: React.FC<{ 
+  task: TarefaResource; 
+  isDragging?: boolean; 
+  dragListeners?: any;
+  onClick?: (taskId: string) => void;
+}> = ({
   task,
   isDragging = false,
+  dragListeners,
+  onClick,
 }) => {
   const priorityColors = {
     BAIXA: 'bg-gray-100 text-gray-700',
@@ -49,13 +57,38 @@ const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
     URGENTE: 'bg-red-100 text-red-700',
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open modal when clicking interactive elements or dragging
+    if (isDragging || !task.id) return;
+    
+    // Check if click was on an interactive element or drag handle
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input') || target.closest('.drag-handle')) {
+      return;
+    }
+    
+    onClick?.(task.id);
+  };
+
   return (
     <div
-      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-move hover:shadow-md transition-shadow touch-pan-y sm:p-4 ${
+      onClick={handleCardClick}
+      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow touch-pan-y sm:p-4 relative ${
         isDragging ? 'opacity-50' : ''
       }`}
     >
-      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">{task.titulo}</h4>
+      {dragListeners && (
+        <div 
+          {...dragListeners} 
+          className="drag-handle absolute top-2 right-2 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+          title="Drag to reorder"
+        >
+          <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+          </svg>
+        </div>
+      )}
+      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base pr-8">{task.titulo}</h4>
       {task.descricao && (
         <p className="text-xs text-gray-600 mb-2 sm:text-sm">{task.descricao}</p>
       )}
@@ -83,7 +116,10 @@ const TaskCard: React.FC<{ task: TarefaResource; isDragging?: boolean }> = ({
 };
 
 // Sortable Task Card Component
-const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
+const SortableTaskCard: React.FC<{ 
+  task: TarefaResource; 
+  onClick?: (taskId: string) => void;
+}> = ({ task, onClick }) => {
   const {
     attributes,
     listeners,
@@ -99,8 +135,13 @@ const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskCard task={task} isDragging={isDragging} />
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <TaskCard 
+        task={task} 
+        isDragging={isDragging} 
+        dragListeners={listeners}
+        onClick={onClick}
+      />
     </div>
   );
 };
@@ -109,7 +150,8 @@ const SortableTaskCard: React.FC<{ task: TarefaResource }> = ({ task }) => {
 const StatusColumn: React.FC<{
   status: StatusTarefaResource;
   tasks: TarefaResource[];
-}> = ({ status, tasks }) => {
+  onTaskClick?: (taskId: string) => void;
+}> = ({ status, tasks, onTaskClick }) => {
   return (
     <div className="bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -137,7 +179,11 @@ const StatusColumn: React.FC<{
       >
         <div className="flex-1 space-y-2 overflow-y-auto max-h-[calc(100vh-300px)]">
           {tasks.map((task) => (
-            <SortableTaskCard key={task.id} task={task} />
+            <SortableTaskCard 
+              key={task.id} 
+              task={task} 
+              onClick={onTaskClick}
+            />
           ))}
         </div>
       </SortableContext>
@@ -292,6 +338,8 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
   const [loading, setLoading] = useState(true);  const [error, setError] = useState<string | null>(null);  const [activeTask, setActiveTask] = useState<TarefaResource | null>(null);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTaskStatusId, setNewTaskStatusId] = useState<string>('');
+  const [selectedTarefaId, setSelectedTarefaId] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -394,7 +442,6 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
         const activeItems = prev[activeStatusId] || [];
         const overItems = prev[overStatusId] || [];
 
-        const activeIndex = activeItems.findIndex((t) => t.id === activeId);
         const overIndex = overTask
           ? overItems.findIndex((t) => t.id === overId)
           : overItems.length;
@@ -521,6 +568,21 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
     }
   };
 
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTarefaId(taskId);
+    setShowViewModal(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setSelectedTarefaId(null);
+  };
+
+  const handleTaskUpdate = async () => {
+    // Refresh board after task update/delete
+    await loadBoardAndTasks();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -586,6 +648,7 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
               key={status.id}
               status={status}
               tasks={tasksByStatus[status.id!] || []}
+              onTaskClick={handleTaskClick}
             />
           ))}
         </div>
@@ -600,6 +663,16 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
           statusId={newTaskStatusId}
           onClose={() => setShowNewTaskModal(false)}
           onSubmit={handleCreateTask}
+        />
+      )}
+
+      {showViewModal && selectedTarefaId && (
+        <TarefaViewModal
+          tarefaId={selectedTarefaId}
+          casoId={casoId}
+          isOpen={showViewModal}
+          onClose={handleCloseViewModal}
+          onUpdate={handleTaskUpdate}
         />
       )}
     </div>

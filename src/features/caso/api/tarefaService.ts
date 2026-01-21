@@ -1,5 +1,5 @@
 import apiClient from '../../../config/api';
-import type { TarefaResource } from './api-types';
+import type { TarefaResource, TarefaDetailResource } from './api-types';
 
 export const tarefaService = {
   getTarefasByCaso: async (groupId: string, casoId: string): Promise<TarefaResource[]> => {
@@ -28,5 +28,29 @@ export const tarefaService = {
   reorderTarefa: async (groupId: string, tarefaId: string, newOrdem: number): Promise<TarefaResource> => {
     const response = await apiClient.patch(`/office-group/${groupId}/tarefas/${tarefaId}/reorder`, { newOrdem });
     return response.data;
+  },
+
+  // Single task operations
+  getTarefa: async (groupId: string, tarefaId: string): Promise<TarefaDetailResource> => {
+    const response = await apiClient.get(`/office-group/${groupId}/tarefas/${tarefaId}`);
+    return response.data;
+  },
+
+  updateTarefa: async (groupId: string, tarefaId: string, data: Partial<TarefaResource>): Promise<TarefaResource> => {
+    const response = await apiClient.put(`/office-group/${groupId}/tarefas/${tarefaId}`, data);
+    return response.data;
+  },
+
+  deleteTarefa: async (groupId: string, tarefaId: string): Promise<void> => {
+    await apiClient.delete(`/office-group/${groupId}/tarefas/${tarefaId}`);
+  },
+
+  // Watcher operations (conditional on backend support)
+  addWatcher: async (groupId: string, tarefaId: string, employeeId: string): Promise<void> => {
+    await apiClient.post(`/office-group/${groupId}/tarefas/${tarefaId}/watchers`, { employeeId });
+  },
+
+  removeWatcher: async (groupId: string, tarefaId: string, employeeId: string): Promise<void> => {
+    await apiClient.delete(`/office-group/${groupId}/tarefas/${tarefaId}/watchers/${employeeId}`);
   }
 };
