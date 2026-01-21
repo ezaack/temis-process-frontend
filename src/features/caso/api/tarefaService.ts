@@ -17,19 +17,6 @@ export const tarefaService = {
     return response.data;
   },
 
-  moveTarefa: async (groupId: string, tarefaId: string, newStatusId: string, newOrdem?: number): Promise<TarefaResource> => {
-    const response = await apiClient.patch(`/office-group/${groupId}/tarefas/${tarefaId}/move`, { 
-      newStatusId, 
-      newOrdem 
-    });
-    return response.data;
-  },
-
-  reorderTarefa: async (groupId: string, tarefaId: string, newOrdem: number): Promise<TarefaResource> => {
-    const response = await apiClient.patch(`/office-group/${groupId}/tarefas/${tarefaId}/reorder`, { newOrdem });
-    return response.data;
-  },
-
   // Single task operations
   getTarefa: async (groupId: string, tarefaId: string): Promise<TarefaDetailResource> => {
     const response = await apiClient.get(`/office-group/${groupId}/tarefas/${tarefaId}`);
@@ -37,7 +24,7 @@ export const tarefaService = {
   },
 
   updateTarefa: async (groupId: string, tarefaId: string, data: Partial<TarefaResource>): Promise<TarefaResource> => {
-    const response = await apiClient.put(`/office-group/${groupId}/tarefas/${tarefaId}`, data);
+    const response = await apiClient.patch(`/office-group/${groupId}/tarefas/${tarefaId}`, data);
     return response.data;
   },
 

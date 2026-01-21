@@ -111,7 +111,7 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
     if (!groupId) return;
 
     try {
-      await tarefaService.moveTarefa(groupId, taskId, newStatusId);
+      await tarefaService.updateTarefa(groupId, taskId, { statusId: newStatusId });
       toast.success('Status atualizado com sucesso');
       // Update local state
       setTasks((prevTasks) =>
@@ -137,12 +137,14 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
     if (!groupId || !editedTitle.trim()) return;
 
     try {
-      // Note: We're using moveTarefa to update the task
-      // In a real implementation, you might need a separate updateTarefa endpoint
-      // For now, we'll just update the local state
+      // Use PATCH to update only the title field
+      await tarefaService.updateTarefa(groupId, taskId, {
+        titulo: editedTitle.trim()
+      });
+      
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === taskId ? { ...task, titulo: editedTitle } : task
+          task.id === taskId ? { ...task, titulo: editedTitle.trim() } : task
         )
       );
       toast.success('Título atualizado com sucesso');
@@ -151,6 +153,8 @@ export const CasoTaskList: React.FC<CasoTaskListProps> = ({ casoId }) => {
       console.error('Error updating title:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao atualizar título';
       toast.error(errorMessage);
+      // Reload to revert on error
+      fetchData();
       setEditingTaskId(null);
     }
   };

@@ -503,13 +503,13 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
           }));
 
           // Update ordem on the server
-          console.log('[DragEnd] Calling reorderTarefa API:', { activeId, newIndex });
-          const result = await tarefaService.reorderTarefa(
+          console.log('[DragEnd] Calling updateTarefa API for reorder:', { activeId, newIndex });
+          const result = await tarefaService.updateTarefa(
             user.userData.officeGroupId,
             activeId,
-            newIndex
+            { ordem: newIndex }
           );
-          console.log('[DragEnd] reorderTarefa response:', result);
+          console.log('[DragEnd] updateTarefa response:', result);
           
           // Reload to ensure consistency with server
           console.log('[DragEnd] Reloading board after reorder');
@@ -525,14 +525,13 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
           ? overItems.findIndex((t) => t.id === overId)
           : overItems.length;
 
-        console.log('[DragEnd] Calling moveTarefa API:', { activeId, overStatusId, newIndex });
-        const result = await tarefaService.moveTarefa(
+        console.log('[DragEnd] Calling updateTarefa API:', { activeId, overStatusId, newIndex });
+        const result = await tarefaService.updateTarefa(
           user.userData.officeGroupId,
           activeId,
-          overStatusId,
-          newIndex
+          { statusId: overStatusId, ordem: newIndex }
         );
-        console.log('[DragEnd] moveTarefa response:', result);
+        console.log('[DragEnd] updateTarefa response:', result);
 
         // Refresh tasks to get updated data
         console.log('[DragEnd] Reloading board and tasks');
