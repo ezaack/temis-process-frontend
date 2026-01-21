@@ -130,6 +130,14 @@ export const TarefaViewModal: React.FC<TarefaViewModalProps> = ({
     try {
       setSaving(true);
       await tarefaService.updateTarefa(user.userData.officeGroupId, tarefaId, updates);
+      
+      // Refetch task to get populated relationships (like colaborador)
+      const updatedTarefa = await tarefaService.getTarefa(user.userData.officeGroupId, tarefaId);
+      setTarefa(updatedTarefa);
+      setTempTitle(updatedTarefa.titulo);
+      setTempDescription(updatedTarefa.descricao || '');
+      setTempSolution(updatedTarefa.solucaoProposta || '');
+      
       toast.success('Sucesso', 'Tarefa atualizada com sucesso');
       onUpdate?.(); // Trigger parent refresh
     } catch (error: any) {
@@ -500,7 +508,7 @@ export const TarefaViewModal: React.FC<TarefaViewModalProps> = ({
                             value={tarefa.colaboradorId || null}
                             onChange={(colaboradorId) => handleUpdate({ colaboradorId: colaboradorId || undefined })}
                             officeUnitId={caso.officeUnitId}
-                            currentUserId={undefined}
+                            currentUserId={user?.userData?.employeeId}
                             disabled={saving}
                           />
                         </div>
@@ -606,15 +614,23 @@ export const TarefaViewModal: React.FC<TarefaViewModalProps> = ({
                             {formatDate(tarefa.updatedAt)}
                           </p>
                         </div>
-                        {tarefa.colaborador && (
+                        {tarefa.colaboradorId && (
                           <div>
                             <p className="text-sm text-bodydark mb-1">Responsável</p>
-                            <p className="text-sm font-medium text-black dark:text-white">
-                              {tarefa.colaborador.nome}
-                            </p>
-                            <p className="text-xs text-bodydark">
-                              {tarefa.colaborador.email}
-                            </p>
+                            {tarefa.colaborador ? (
+                              <>
+                                <p className="text-sm font-medium text-black dark:text-white">
+                                  {tarefa.colaborador.nome}
+                                </p>
+                                <p className="text-xs text-bodydark">
+                                  {tarefa.colaborador.email}
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-sm font-medium text-black dark:text-white">
+                                ID: {tarefa.colaboradorId.slice(0, 8)}...
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
