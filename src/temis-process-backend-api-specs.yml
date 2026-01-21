@@ -147,6 +147,36 @@ paths:
       responses:
         "200":
           description: OK
+    patch:
+      tags:
+      - tarefa-controller
+      operationId: patchTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tarefaId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status/{statusId}:
     put:
       tags:
@@ -210,6 +240,42 @@ paths:
       responses:
         "200":
           description: OK
+    patch:
+      tags:
+      - quadro-tarefas-controller
+      operationId: patchStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: quadroId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchStatusTarefaRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StatusTarefaResource"
   /v0/office-group/{groupId}/office-unit:
     put:
       tags:
@@ -262,7 +328,7 @@ paths:
     delete:
       tags:
       - unidade-controller
-      operationId: delete_2
+      operationId: delete_1
       parameters:
       - name: groupId
         in: path
@@ -332,6 +398,30 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ColaboradorResponse"
+    delete:
+      tags:
+      - colaborador-controller
+      operationId: delete_2
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
   /v0/office-group/{groupId}/clients:
     put:
       tags:
@@ -480,33 +570,6 @@ paths:
       responses:
         "200":
           description: OK
-  /v0/office-group/{groupId}/tarefas/status/{statusId}:
-    get:
-      tags:
-      - tarefa-controller
-      operationId: getTarefasByStatus
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: statusId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status:
     post:
       tags:
@@ -693,6 +756,63 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedResponseClientResponse"
+  /v0/office-group/{groupId}/casos/{casoId}/tarefas:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByCaso
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
+    post:
+      tags:
+      - tarefa-controller
+      operationId: createTarefa
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: casoId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TarefaResource"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/caso:
     post:
       tags:
@@ -797,68 +917,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/JwtDto"
-  /v0/office-group/{groupId}/tarefas/{tarefaId}/reorder:
-    patch:
-      tags:
-      - tarefa-controller
-      operationId: reorderTarefa
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: tarefaId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReorderRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TarefaResource"
-  /v0/office-group/{groupId}/tarefas/{tarefaId}/move:
-    patch:
-      tags:
-      - tarefa-controller
-      operationId: moveTarefa
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: tarefaId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/MoveTarefaRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/quadro-tarefas/{quadroId}/status/{statusId}/reorder:
     patch:
       tags:
@@ -915,6 +973,33 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OfficeGroupResponse"
+  /v0/office-group/{groupId}/tarefas/status/{statusId}:
+    get:
+      tags:
+      - tarefa-controller
+      operationId: getTarefasByStatus
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: statusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TarefaResource"
   /v0/office-group/{groupId}/tarefas/quadro/{quadroId}:
     get:
       tags:
@@ -955,63 +1040,6 @@ paths:
           type: string
           format: uuid
       - name: colaboradorId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TarefaResource"
-  /v0/office-group/{groupId}/casos/{casoId}/tarefas:
-    post:
-      tags:
-      - tarefa-controller
-      operationId: createTarefa
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: casoId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TarefaResource"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TarefaResource"
-    get:
-      tags:
-      - tarefa-controller
-      operationId: getTarefasByCaso
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: casoId
         in: path
         required: true
         schema:
@@ -1199,31 +1227,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ClientResponse"
-  /v0/office-group/{groupId}:
-    delete:
-      tags:
-      - colaborador-controller
-      operationId: delete_1
-      parameters:
-      - name: groupId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: id
-        in: query
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: boolean
 components:
   schemas:
     OfficeGroupResource:
@@ -1252,8 +1255,6 @@ components:
         officeGroupData:
           $ref: "#/components/schemas/OfficeGroupResource"
     TarefaResource:
-      required:
-      - titulo
       type: object
       properties:
         id:
@@ -1282,7 +1283,7 @@ components:
           format: int32
         prazo:
           type: string
-          format: date-time
+          format: date
         estimativaHoras:
           type: integer
           format: int32
@@ -1906,13 +1907,13 @@ components:
         count:
           type: integer
           format: int64
+        numberOfPages:
+          type: integer
+          format: int32
         pageSize:
           type: integer
           format: int32
         currentPageIndex:
-          type: integer
-          format: int32
-        numberOfPages:
           type: integer
           format: int32
     CriarColaboradorRequest:
@@ -1955,13 +1956,13 @@ components:
         count:
           type: integer
           format: int64
+        numberOfPages:
+          type: integer
+          format: int32
         pageSize:
           type: integer
           format: int32
         currentPageIndex:
-          type: integer
-          format: int32
-        numberOfPages:
           type: integer
           format: int32
     ClientCreateRequest:
@@ -2011,13 +2012,13 @@ components:
         count:
           type: integer
           format: int64
+        numberOfPages:
+          type: integer
+          format: int32
         pageSize:
           type: integer
           format: int32
         currentPageIndex:
-          type: integer
-          format: int32
-        numberOfPages:
           type: integer
           format: int32
     CasoResource:
@@ -2083,13 +2084,13 @@ components:
         count:
           type: integer
           format: int64
+        numberOfPages:
+          type: integer
+          format: int32
         pageSize:
           type: integer
           format: int32
         currentPageIndex:
-          type: integer
-          format: int32
-        numberOfPages:
           type: integer
           format: int32
     PagedFilterOfficeGroupResource:
@@ -2110,13 +2111,13 @@ components:
         count:
           type: integer
           format: int64
+        numberOfPages:
+          type: integer
+          format: int32
         pageSize:
           type: integer
           format: int32
         currentPageIndex:
-          type: integer
-          format: int32
-        numberOfPages:
           type: integer
           format: int32
     SignUpDataResource:
@@ -2189,22 +2190,23 @@ components:
           format: uuid
         officeUnitName:
           type: string
+    PatchStatusTarefaRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        ordem:
+          type: integer
+          format: int32
+        cor:
+          type: string
     ReorderRequest:
       required:
       - newOrdem
       type: object
       properties:
-        newOrdem:
-          type: integer
-          format: int32
-    MoveTarefaRequest:
-      required:
-      - newStatusId
-      type: object
-      properties:
-        newStatusId:
-          type: string
-          format: uuid
         newOrdem:
           type: integer
           format: int32
