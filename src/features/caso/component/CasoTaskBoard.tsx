@@ -10,6 +10,7 @@ import {
   DragStartEvent,
   DragOverEvent,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -44,11 +45,13 @@ const TaskCard: React.FC<{
   isDragging?: boolean; 
   dragListeners?: any;
   onClick?: (taskId: string) => void;
+  isUpdating?: boolean;
 }> = ({
   task,
   isDragging = false,
   dragListeners,
   onClick,
+  isUpdating = false,
 }) => {
   const priorityColors = {
     BAIXA: 'bg-gray-100 text-gray-700',
@@ -73,10 +76,15 @@ const TaskCard: React.FC<{
   return (
     <div
       onClick={handleCardClick}
-      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow touch-pan-y sm:p-4 relative ${
-        isDragging ? 'opacity-50' : ''
+      className={`bg-white p-3 rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-all duration-200 touch-pan-y sm:p-4 relative ${
+        isDragging ? 'opacity-50 rotate-2 scale-105 shadow-xl ring-2 ring-primary' : ''
       }`}
     >
+      {isUpdating && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-boxdark/80 flex items-center justify-center rounded-lg z-10">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
       {dragListeners && (
         <div 
           {...dragListeners} 
@@ -119,7 +127,8 @@ const TaskCard: React.FC<{
 const SortableTaskCard: React.FC<{ 
   task: TarefaResource; 
   onClick?: (taskId: string) => void;
-}> = ({ task, onClick }) => {
+  isUpdating?: boolean;
+}> = ({ task, onClick, isUpdating }) => {
   const {
     attributes,
     listeners,
@@ -141,6 +150,7 @@ const SortableTaskCard: React.FC<{
         isDragging={isDragging} 
         dragListeners={listeners}
         onClick={onClick}
+        isUpdating={isUpdating}
       />
     </div>
   );
@@ -151,9 +161,17 @@ const StatusColumn: React.FC<{
   status: StatusTarefaResource;
   tasks: TarefaResource[];
   onTaskClick?: (taskId: string) => void;
-}> = ({ status, tasks, onTaskClick }) => {
+  updatingTaskIds?: Set<string>;
+}> = ({ status, tasks, onTaskClick, updatingTaskIds }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: status.id! });
+
   return (
-    <div className="bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4">
+    <div
+      ref={setNodeRef}
+      className={`bg-gray-50 rounded-lg p-3 min-w-[280px] flex flex-col sm:min-w-[300px] sm:p-4 transition-all duration-200 ${
+        isOver ? 'ring-2 ring-primary bg-primary/5 shadow-lg' : ''
+      }`}
+    >
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-1.5 sm:gap-2">
           {status.cor && (
@@ -183,6 +201,7 @@ const StatusColumn: React.FC<{
               key={task.id} 
               task={task} 
               onClick={onTaskClick}
+              isUpdating={updatingTaskIds?.has(task.id!)}
             />
           ))}
         </div>
@@ -336,6 +355,7 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
   const [tasks, setTasks] = useState<TarefaResource[]>([]);
   const [tasksByStatus, setTasksByStatus] = useState<TasksByStatus>({});
   const [loading, setLoading] = useState(true);  const [error, setError] = useState<string | null>(null);  const [activeTask, setActiveTask] = useState<TarefaResource | null>(null);
+  const [updatingTaskIds, setUpdatingTaskIds] = useState<Set<string>>(new Set());
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTaskStatusId, setNewTaskStatusId] = useState<string>('');
   const [selectedTarefaId, setSelectedTarefaId] = useState<string | null>(null);
@@ -413,66 +433,35 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id as string;
-    const overId = over.id as string;
-
-    // Find which status columns the active and over items belong to
-    const activeTask = tasks.find((t) => t.id === activeId);
-    if (!activeTask) return;
-
-    let overStatusId = '';
-    
-    // Check if over a task
-    const overTask = tasks.find((t) => t.id === overId);
-    if (overTask) {
-      overStatusId = overTask.statusId;
-    } else {
-      // Check if over a status column (for empty columns)
-      overStatusId = overId;
-    }
-
-    const activeStatusId = activeTask.statusId;
-
-    if (activeStatusId !== overStatusId) {
-      // Moving between columns - update local state optimistically
-      setTasksByStatus((prev) => {
-        const activeItems = prev[activeStatusId] || [];
-        const overItems = prev[overStatusId] || [];
-
-        const overIndex = overTask
-          ? overItems.findIndex((t) => t.id === overId)
-          : overItems.length;
-
-        const newActiveItems = activeItems.filter((t) => t.id !== activeId);
-        const movedTask = { ...activeTask, statusId: overStatusId };
-        const newOverItems = [...overItems];
-        newOverItems.splice(overIndex, 0, movedTask);
-
-        return {
-          ...prev,
-          [activeStatusId]: newActiveItems,
-          [overStatusId]: newOverItems,
-        };
-      });
-    }
+    // Visual feedback only - actual state update happens in handleDragEnd
+    // This prevents duplicate key issues during drag operations
+    return;
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
 
-    if (!over || !user?.userData?.officeGroupId) return;
+    if (!over || !user?.userData?.officeGroupId) {
+      console.log('[DragEnd] Early return - over:', !!over, 'groupId:', !!user?.userData?.officeGroupId);
+      return;
+    }
 
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    if (activeId === overId) return;
+    console.log('[DragEnd] activeId:', activeId, 'overId:', overId);
+
+    if (activeId === overId) {
+      console.log('[DragEnd] Same item, no move needed');
+      return;
+    }
 
     const activeTask = tasks.find((t) => t.id === activeId);
-    if (!activeTask) return;
+    if (!activeTask) {
+      console.log('[DragEnd] Active task not found:', activeId);
+      return;
+    }
 
     let overStatusId = '';
     const overTask = tasks.find((t) => t.id === overId);
@@ -485,12 +474,25 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
 
     const activeStatusId = activeTask.statusId;
 
+    console.log('[DragEnd] Move details:', {
+      taskId: activeId,
+      fromStatus: activeStatusId,
+      toStatus: overStatusId,
+      sameColumn: activeStatusId === overStatusId
+    });
+
+    // Set loading state for this task
+    setUpdatingTaskIds(prev => new Set(prev).add(activeId));
+
     try {
       if (activeStatusId === overStatusId) {
         // Reordering within the same column
+        console.log('[DragEnd] Reordering within same column');
         const items = tasksByStatus[activeStatusId] || [];
         const oldIndex = items.findIndex((t) => t.id === activeId);
         const newIndex = items.findIndex((t) => t.id === overId);
+
+        console.log('[DragEnd] Reorder indices - old:', oldIndex, 'new:', newIndex);
 
         if (oldIndex !== newIndex) {
           const reorderedItems = arrayMove(items, oldIndex, newIndex);
@@ -501,36 +503,59 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
           }));
 
           // Update ordem on the server
-          await tarefaService.reorderTarefa(
+          console.log('[DragEnd] Calling reorderTarefa API:', { activeId, newIndex });
+          const result = await tarefaService.reorderTarefa(
             user.userData.officeGroupId,
             activeId,
             newIndex
           );
+          console.log('[DragEnd] reorderTarefa response:', result);
+          
+          // Reload to ensure consistency with server
+          console.log('[DragEnd] Reloading board after reorder');
+          await loadBoardAndTasks();
+        } else {
+          console.log('[DragEnd] No reorder needed, indices are the same');
         }
       } else {
         // Moving between columns
+        console.log('[DragEnd] Moving between columns');
         const overItems = tasksByStatus[overStatusId] || [];
         const newIndex = overTask
           ? overItems.findIndex((t) => t.id === overId)
           : overItems.length;
 
-        await tarefaService.moveTarefa(
+        console.log('[DragEnd] Calling moveTarefa API:', { activeId, overStatusId, newIndex });
+        const result = await tarefaService.moveTarefa(
           user.userData.officeGroupId,
           activeId,
           overStatusId,
           newIndex
         );
+        console.log('[DragEnd] moveTarefa response:', result);
 
         // Refresh tasks to get updated data
+        console.log('[DragEnd] Reloading board and tasks');
         await loadBoardAndTasks();
       }
 
-      toast.success('Sucesso', 'Task updated successfully');
-    } catch (error) {
-      console.error('Error updating task:', error);
-      toast.error('Erro', 'Failed to update task');
+      console.log('[DragEnd] Update successful');
+      toast.success('Sucesso', 'Tarefa atualizada');
+    } catch (error: any) {
+      console.error('[DragEnd] Error updating task:', error);
+      console.error('[DragEnd] Error response:', error.response?.data);
+      const message = error.response?.data?.message || 'Falha ao atualizar tarefa';
+      toast.error('Erro', message);
       // Reload to revert optimistic update
+      console.log('[DragEnd] Reloading after error');
       await loadBoardAndTasks();
+    } finally {
+      setUpdatingTaskIds(prev => {
+        const next = new Set(prev);
+        next.delete(activeId);
+        return next;
+      });
+      console.log('[DragEnd] Complete');
     }
   };
 
@@ -649,6 +674,7 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
               status={status}
               tasks={tasksByStatus[status.id!] || []}
               onTaskClick={handleTaskClick}
+              updatingTaskIds={updatingTaskIds}
             />
           ))}
         </div>
@@ -657,6 +683,13 @@ export const CasoTaskBoard = forwardRef<CasoTaskBoardHandle, CasoTaskBoardProps>
           {activeTask ? <TaskCard task={activeTask} isDragging /> : null}
         </DragOverlay>
       </DndContext>
+
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 5h12a1 1 0 011 1v8a1 1 0 01-1 1H2a1 1 0 01-1-1V6a1 1 0 011-1zm0-2h12v1H2V3z"/>
+        </svg>
+        <span>Dica: Arraste tarefas entre colunas ou use Tab + Espaço para mover pelo teclado</span>
+      </div>
 
       {showNewTaskModal && (
         <NewTaskModal
