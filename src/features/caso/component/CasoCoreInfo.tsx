@@ -8,6 +8,13 @@ import { useToast } from '../../../hooks/useToast';
 
 interface CasoCoreInfoProps {
   caso: CasoDetailResource;
+  statusCounts?: {
+    tarefas: number;
+    processos: number;
+    prazos: number;
+    arquivos: number;
+  };
+  onIconClick?: (section: 'tarefas' | 'processos' | 'prazos' | 'arquivos') => void;
 }
 
 interface EmployeeInfo {
@@ -117,7 +124,7 @@ const EmployeeAvatarGroup: React.FC<EmployeeAvatarGroupProps> = ({ employees, ma
 };
 
 // Main component
-const CasoCoreInfo: React.FC<CasoCoreInfoProps> = ({ caso }) => {
+const CasoCoreInfo: React.FC<CasoCoreInfoProps> = ({ caso, statusCounts, onIconClick }) => {
   const [employees, setEmployees] = useState<EmployeeInfo[]>([]);
   const [officeUnit, setOfficeUnit] = useState<OfficeUnitResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -288,12 +295,121 @@ const CasoCoreInfo: React.FC<CasoCoreInfoProps> = ({ caso }) => {
 
   const responsibleEmployee = employees.find(e => e.isResponsible);
 
+  // Notification icon component
+  const NotificationIcon: React.FC<{
+    icon: React.ReactNode;
+    count: number;
+    title: string;
+    section: 'tarefas' | 'processos' | 'prazos' | 'arquivos';
+  }> = ({ icon, count, title, section }) => (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        onIconClick?.(section);
+      }}
+      className="group relative flex h-10 w-10 items-center justify-center rounded-lg bg-meta-2 transition-all hover:bg-primary hover:shadow-md dark:bg-meta-4 dark:hover:bg-primary"
+      title={title}
+    >
+      <div className="group-hover:scale-110 transition-transform">
+        {icon}
+      </div>
+      {count > 0 && (
+        <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-danger px-1.5 text-xs font-bold text-white shadow-md">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </button>
+  );
+
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-4 py-3 dark:border-strokedark sm:px-6 sm:py-4">
+      <div className="flex items-center justify-between border-b border-stroke px-4 py-3 dark:border-strokedark sm:px-6 sm:py-4">
         <h3 className="text-base font-semibold text-black dark:text-white sm:text-lg">
           Informações do Caso
         </h3>
+        
+        {/* Status Notification Icons */}
+        {statusCounts && (
+          <div className="flex items-center gap-2">
+            <NotificationIcon
+              section="tarefas"
+              title="Tarefas Abertas"
+              count={statusCounts.tarefas}
+              icon={
+                <svg
+                  className="fill-primary dark:fill-white group-hover:fill-white"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              }
+            />
+            
+            <NotificationIcon
+              section="processos"
+              title="Processos Ativos"
+              count={statusCounts.processos}
+              icon={
+                <svg
+                  className="fill-primary dark:fill-white group-hover:fill-white"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                </svg>
+              }
+            />
+            
+            <NotificationIcon
+              section="prazos"
+              title="Prazos Próximos"
+              count={statusCounts.prazos}
+              icon={
+                <svg
+                  className="fill-primary dark:fill-white group-hover:fill-white"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                  <path d="M10.5 5h-1v6l5 3 .5-.866-4.5-2.7V5z" />
+                </svg>
+              }
+            />
+            
+            <NotificationIcon
+              section="arquivos"
+              title="Arquivos"
+              count={statusCounts.arquivos}
+              icon={
+                <svg
+                  className="fill-primary dark:fill-white group-hover:fill-white"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7.414A2 2 0 0017.414 6L14 2.586A2 2 0 0012.586 2H4zm8 0v4h4l-4-4z" />
+                </svg>
+              }
+            />
+          </div>
+        )}
       </div>
       <div className="p-4 sm:p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">

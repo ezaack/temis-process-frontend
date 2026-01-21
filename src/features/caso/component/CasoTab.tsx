@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { CasoDetailResource } from '../api/api-types';
-import CasoStatusCards from './CasoStatusCards';
 import CasoCoreInfo from './CasoCoreInfo';
 import CasoClientesSection from './CasoClientesSection';
 import CasoProcessosSection from './CasoProcessosSection';
 import CasoPrazosSection from './CasoPrazosSection';
 import CasoMovimentacoes from './CasoMovimentacoes';
 import CasoArquivos from './CasoArquivos';
+import { useUserContext } from '../../../context/UserContext';
+import { tarefaService } from '../api/tarefaService';
+import { processoService } from '../api/processos';
+import { prazoService } from '../api/prazos';
+import { arquivoService } from '../api/arquivos';
 
 interface CasoTabProps {
   caso: CasoDetailResource;
+  onNavigateToTab?: (tab: 'tarefas') => void;
 }
 
 /**
@@ -21,8 +26,7 @@ interface CasoTabProps {
  * 
  * Layout structure:
  * 1. Dashboard Section:
- *    - Status Summary Cards (metrics overview)
- *    - Core Information Panel (metadata)
+ *    - Core Information Panel with notification icons (metrics overview)
  *    - Descrição (case description)
  *    - Clientes & Partes
  *    - Processos Vinculados
@@ -32,9 +36,77 @@ interface CasoTabProps {
  *    - Movimentações (activity timeline)
  *    - Arquivos (file management)
  */
-const CasoTab: React.FC<CasoTabProps> = ({ caso }) => {
+const CasoTab: React.FC<CasoTabProps> = ({ caso, onNavigateToTab }) => {
+  const { user } = useUserContext();
+  const groupId = user?.userData?.officeGroupId || '';
+  
+  const [statusCounts, setStatusCounts] = useState({
+    tarefas: 0,
+    processos: 0,
+    prazos: 0,
+    arquivos: 0,
+  });
+
+  useEffect(() => {
+    if (!groupId || !caso.id) return;
+
+    const fetchCounts = async () => {
+      try {
+        // Fetch all counts in parallel
+        const [tarefas, processos, prazos, arquivos] = await Promise.allSettled([
+          tarefaService.getTarefasByCaso(groupId, caso.id),
+          processoService.getProcessosByCaso(groupId, caso.id),
+          prazoService.getPrazosByCaso(groupId, caso.id),
+          arquivoService.getArquivosByCaso(groupId, caso.id),
+        ]);
+
+        const newCounts = { tarefas: 0, processos: 0, prazos: 0, arquivos: 0 };
+
+        // Process tarefas
+        if (tarefas.status === 'fulfilled') {
+          newCounts.tarefas = tarefas.value.length;
+        }
+
+        // Process processos (only active ones)
+        if (processos.status === 'fulfilled') {
+          newCounts.processos = processos.value.filter(
+            (p) => p.status === 'em_andamento' || p.status === 'aguardando_citacao'
+          ).length;
+        }
+
+        // Process prazos (upcoming in next 30 days)
+        if (prazos.status === 'fulfilled') {
+          const now = new Date();
+          const next30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          newCounts.prazos = prazos.value.filter((p) => {
+            if (p.concluido) return false;
+            const prazoDate = new Date(p.dataHora);
+            return prazoDate >= now && prazoDate <= next30Days;
+          }).length;
+        }
+
+        // Process arquivos
+        if (arquivos.status === 'fulfilled') {
+          newCounts.arquivos = arquivos.value.length;
+        }
+
+        setStatusCounts(newCounts);
+      } catch (error) {
+        console.error('Error fetching status counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, [groupId, caso.id]);
+
   const handleCardClick = (section: 'tarefas' | 'processos' | 'prazos' | 'arquivos') => {
-    // Smooth scroll to the corresponding section
+    // For tarefas, navigate to the tarefas tab
+    if (section === 'tarefas' && onNavigateToTab) {
+      onNavigateToTab('tarefas');
+      return;
+    }
+
+    // For other sections, smooth scroll to the corresponding section
     const element = document.getElementById(`section-${section}`);
     if (element) {
       const yOffset = -80; // Account for fixed header if present
@@ -50,14 +122,13 @@ const CasoTab: React.FC<CasoTabProps> = ({ caso }) => {
       {/* ============================================ */}
       
       <div className="space-y-6 lg:space-y-8">
-        {/* Status Summary Cards - High Priority */}
-        <section aria-label="Status summary">
-          <CasoStatusCards casoId={caso.id} onCardClick={handleCardClick} />
-        </section>
-
-        {/* Core Information Panel - High Priority */}
+        {/* Core Information Panel with Notification Icons - High Priority */}
         <section aria-label="Core information">
-          <CasoCoreInfo caso={caso} />
+          <CasoCoreInfo 
+            caso={caso} 
+            statusCounts={statusCounts}
+            onIconClick={handleCardClick}
+          />
         </section>
 
         {/* Descrição Section - High Priority (if present) */}
