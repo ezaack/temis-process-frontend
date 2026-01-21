@@ -207,7 +207,12 @@ export const CasoView: React.FC = () => {
           </div>
         }
       >
-        {activeTab === 'caso' && <CasoTab caso={caso} />}
+        {activeTab === 'caso' && (
+          <CasoTab 
+            caso={caso} 
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
         {activeTab === 'tarefas' && <TarefasTab casoId={id!} />}
       </Suspense>
     </div>
